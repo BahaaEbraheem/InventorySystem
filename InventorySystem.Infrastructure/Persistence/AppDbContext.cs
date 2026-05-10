@@ -44,12 +44,38 @@ namespace InventorySystem.Infrastructure.Persistence
                 }
             }
 
+            // StockTransfer relationships
+            modelBuilder.Entity<StockTransfer>()
+                .HasOne(st => st.FromWarehouse)
+                .WithMany()
+                .HasForeignKey(st => st.FromWarehouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<StockTransfer>()
+                .HasOne(st => st.ToWarehouse)
+                .WithMany()
+                .HasForeignKey(st => st.ToWarehouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // SaleItemBatchAllocation relationships
+            modelBuilder.Entity<SaleItemBatchAllocation>()
+                .HasOne(a => a.SaleItem)
+                .WithMany(i => i.BatchAllocations)
+                .HasForeignKey(a => a.SaleItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SaleItemBatchAllocation>()
+                .HasOne(a => a.StockBatch)
+                .WithMany()
+                .HasForeignKey(a => a.StockBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Indexes
             modelBuilder.Entity<StockBatch>()
                 .HasIndex(x => new { x.ProductId, x.WarehouseId, x.PurchaseDate });
 
             modelBuilder.Entity<Sale>()
-    .HasIndex(x => x.SaleDate);
+                .HasIndex(x => x.SaleDate);
 
             modelBuilder.Entity<Sale>()
                 .HasIndex(x => x.WarehouseId);
@@ -59,8 +85,8 @@ namespace InventorySystem.Infrastructure.Persistence
 
             modelBuilder.Entity<Product>()
                 .HasIndex(x => x.CategoryId);
-
         }
+
 
         private static LambdaExpression GetSoftDeleteFilter(Type type)
         {
