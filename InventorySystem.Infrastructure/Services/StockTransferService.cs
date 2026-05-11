@@ -16,18 +16,27 @@ public class StockTransferService : IStockTransferService
         _dbContext = dbContext;
         _notificationService = notificationService;
     }
-
     public async Task<CreateStockTransferResponse> CreateTransferAsync(CreateStockTransferRequest request, CancellationToken cancellationToken = default)
     {
-        if (request == null || request.Items == null || !request.Items.Any())
+        //  تحقق من التكرار باستخدام IdempotencyKey
+        if (request.IdempotencyKey != Guid.Empty)
+        {
+            var exists = await _dbContext.StockTransfers
+                .AnyAsync(t => t.IdempotencyKey == request.IdempotencyKey, cancellationToken);
+
+            if (exists)
+                throw new InvalidOperationException("تم إرسال نفس طلب التحويل مسبقاً");
+        }
+
+        //  Validation أساسي
+        if (request == null)
+            throw new ArgumentNullException(nameof(request), "طلب التحويل لا يمكن أن يكون فارغاً");
+
+        if (request.Items == null || !request.Items.Any())
             throw new ArgumentException("يجب أن يحتوي طلب التحويل على عنصر واحد على الأقل");
 
-        // التحقق من التكرار باستخدام IdempotencyKey
-        var exists = await _dbContext.StockTransfers
-            .AnyAsync(t => t.IdempotencyKey == request.IdempotencyKey, cancellationToken);
-
-        if (exists)
-            throw new InvalidOperationException("تم إرسال نفس طلب التحويل مسبقاً");
+        if (request.FromWarehouseId == request.ToWarehouseId)
+            throw new ArgumentException("لا يمكن التحويل إلى نفس المستودع");
 
         var strategy = _dbContext.Database.CreateExecutionStrategy();
 
@@ -43,13 +52,16 @@ public class StockTransferService : IStockTransferService
                     FromWarehouseId = request.FromWarehouseId,
                     ToWarehouseId = request.ToWarehouseId,
                     TransferDate = request.TransferDate,
-                    IdempotencyKey = request.IdempotencyKey, // إضافة المفتاح هنا
+                    IdempotencyKey = request.IdempotencyKey,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "system"
                 };
 
                 foreach (var item in request.Items)
                 {
+                    if (item.Quantity <= 0)
+                        throw new ArgumentException($"الكمية للمنتج {item.ProductId} يجب أن تكون أكبر من صفر");
+
                     var transferItem = new StockTransferItem
                     {
                         Id = Guid.NewGuid(),
@@ -65,8 +77,8 @@ public class StockTransferService : IStockTransferService
                     // جلب الدفعات من المستودع المصدر مع قفل الصفوف
                     var sourceBatches = await _dbContext.StockBatches
                         .FromSqlRaw(@"
-                            SELECT * FROM StockBatches WITH (ROWLOCK, UPDLOCK)
-                            WHERE ProductId = {0} AND WarehouseId = {1} AND QuantityRemaining > 0",
+                                SELECT * FROM StockBatches WITH (ROWLOCK, UPDLOCK)
+                                WHERE ProductId = {0} AND WarehouseId = {1} AND QuantityRemaining > 0",
                             item.ProductId, request.FromWarehouseId)
                         .ToListAsync(cancellationToken);
 
@@ -77,7 +89,10 @@ public class StockTransferService : IStockTransferService
 
                     var totalAvailable = sourceBatches.Sum(b => b.QuantityRemaining);
                     if (totalAvailable < item.Quantity)
+                    {
+                        await _notificationService.NotifyTransferFailedAsync(item.ProductId, request.FromWarehouseId, item.Quantity);
                         throw new InvalidOperationException($"المخزون غير كافٍ في المستودع المصدر للمنتج {item.ProductId}");
+                    }
 
                     var remainingToMove = item.Quantity;
 
@@ -86,18 +101,9 @@ public class StockTransferService : IStockTransferService
                         if (remainingToMove <= 0) break;
 
                         var moveQty = Math.Min(batch.QuantityRemaining, remainingToMove);
-
-                        // منطق الحجز
-                        if (batch.QuantityAvailable < moveQty)
-                            throw new InvalidOperationException("المخزون غير كافٍ بعد التحقق من الحجز");
-
-                        batch.QuantityReserved += moveQty;
                         batch.QuantityRemaining -= moveQty;
-                        batch.QuantityReserved -= moveQty;
-
                         remainingToMove -= moveQty;
 
-                        // إنشاء Batch جديد في المستودع الوجهة
                         var destBatch = new StockBatch
                         {
                             Id = Guid.NewGuid(),
@@ -115,7 +121,7 @@ public class StockTransferService : IStockTransferService
                         await _dbContext.StockBatches.AddAsync(destBatch, cancellationToken);
                         _dbContext.StockBatches.Update(batch);
 
-                        // إشعارات دقيقة
+                        //  إشعارات دقيقة
                         await _notificationService.NotifyStockChangedAsync(batch.ProductId, batch.WarehouseId, batch.QuantityRemaining);
                         await _notificationService.NotifyStockChangedAsync(destBatch.ProductId, destBatch.WarehouseId, destBatch.QuantityRemaining);
                     }
@@ -124,6 +130,9 @@ public class StockTransferService : IStockTransferService
                 await _dbContext.StockTransfers.AddAsync(transfer, cancellationToken);
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
+
+                //  إشعار نجاح التحويل
+                await _notificationService.NotifyTransferReceivedAsync(transfer.Id);
 
                 return new CreateStockTransferResponse { StockTransferId = transfer.Id };
             }
@@ -134,5 +143,6 @@ public class StockTransferService : IStockTransferService
             }
         });
     }
+  
 }
 
