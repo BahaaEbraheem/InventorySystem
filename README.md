@@ -214,8 +214,8 @@ The enum (`Pending → InTransit → Received → Cancelled → Failed`) exists 
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- SQL Server 2019+ **or** Docker Desktop
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- SQL Server 2022+ **or** Docker Desktop
 
 ---
 
