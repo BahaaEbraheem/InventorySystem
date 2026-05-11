@@ -147,15 +147,23 @@ The enum (`Pending → InTransit → Received → Cancelled → Failed`) exists 
 ### Clean Architecture Layers
 
 ```
-┌─────────────────────────────────────┐
-│           API Layer                 │  Controllers, Middleware, Swagger
-├─────────────────────────────────────┤
-│        Application Layer            │  DTOs, Interfaces, Use-Case Contracts
-├─────────────────────────────────────┤
-│          Domain Layer               │  Entities, Enums, Exceptions (no dependencies)
-├─────────────────────────────────────┤
-│      Infrastructure Layer           │  EF Core, Services, SignalR, Seed Data
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│                 API Layer                    │  Controllers, Middleware, Swagger
+├──────────────────────────────────────────────┤
+│              Application Layer               │  DTOs, Interfaces, Use-Case Contracts
+├──────────────────────────────────────────────┤
+│                Domain Layer                  │  Entities, Enums, Exceptions (no dependencies)
+├──────────────────────────────────────────────┤
+│            Infrastructure Layer              │  EF Core, Services, SignalR, Seed Data
+├──────────────────────────────────────────────┤
+│              Shared Kernel Layer             │  Shared utilities, BaseResponse<T>, Enums,
+│                                              │  cross-cutting concerns used by all layers
+│              (InventorySystem.Shared)        │
+├──────────────────────────────────────────────┤
+│                Test Layers                   │  Unit Tests + Integration Tests
+│                                              │  (InventorySystem.Tests)
+└──────────────────────────────────────────────┘
+
 ```
 
 ### SOLID Principles Applied
