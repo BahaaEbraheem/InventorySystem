@@ -154,6 +154,7 @@ namespace InventorySystem.Infrastructure.Migrations
                     FromWarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IdempotencyKey = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ToWarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TransferDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),

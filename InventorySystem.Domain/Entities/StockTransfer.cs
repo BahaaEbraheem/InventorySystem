@@ -12,6 +12,7 @@ namespace InventorySystem.Domain.Entities
         public Warehouse FromWarehouse { get; set; } = default!;
         public StockTransferStatus Status { get; set; } = StockTransferStatus.Pending;
         public DateTime? CompletedAt { get; set; }
+        public Guid IdempotencyKey { get; set; }
 
 
         public Guid ToWarehouseId { get; set; }

@@ -35,43 +35,52 @@ public class NotificationService : INotificationService
         });
     }
 
-    public async Task NotifyPurchaseOrderReceivedAsync(Guid purchaseOrderId)
+    public Task NotifyPurchaseOrderReceivedAsync(Guid purchaseOrderId)
     {
-        await _hubContext.Clients.All
-            .SendAsync("PurchaseOrderReceived", new
-            {
-                purchaseOrderId,
-                timestamp = DateTime.UtcNow
-            });
+        return _hubContext.Clients.All.SendAsync("PurchaseOrderReceived", new
+        {
+            purchaseOrderId,
+            timestamp = DateTime.UtcNow
+        });
     }
 
-    public async Task NotifyPurchaseOrderSubmittedAsync(Guid purchaseOrderId)
+    public Task NotifyPurchaseOrderSubmittedAsync(Guid purchaseOrderId)
     {
-        await _hubContext.Clients.All
-           .SendAsync("PurchaseOrderSubmitted", new
-           {
-               purchaseOrderId,
-               timestamp = DateTime.UtcNow
-           });
+        return _hubContext.Clients.All.SendAsync("PurchaseOrderSubmitted", new
+        {
+            purchaseOrderId,
+            timestamp = DateTime.UtcNow
+        });
     }
 
-    public async Task NotifyPurchaseOrderCancelledAsync(Guid purchaseOrderId)
+    public Task NotifyPurchaseOrderCancelledAsync(Guid purchaseOrderId)
     {
-        await _hubContext.Clients.All
-      .SendAsync("PurchaseOrderCancelled", new
-      {
-          purchaseOrderId,
-          timestamp = DateTime.UtcNow
-      });
+        return _hubContext.Clients.All.SendAsync("PurchaseOrderCancelled", new
+        {
+            purchaseOrderId,
+            timestamp = DateTime.UtcNow
+        });
     }
 
-    public async Task NotifyTransferReceivedAsync(Guid transferId)
+    public Task NotifyTransferReceivedAsync(Guid transferId)
     {
-        await _hubContext.Clients.All
-      .SendAsync("TransferReceived", new
-      {
-          transferId,
-          timestamp = DateTime.UtcNow
-      });
+        return _hubContext.Clients.All.SendAsync("TransferReceived", new
+        {
+            transferId,
+            timestamp = DateTime.UtcNow
+        });
+    }
+
+    // ✅ جديد: إشعار فشل التحويل
+    public Task NotifyTransferFailedAsync(Guid productId, Guid warehouseId, decimal attemptedQuantity)
+    {
+        return _hubContext.Clients.All.SendAsync("TransferFailed", new
+        {
+            ProductId = productId,
+            WarehouseId = warehouseId,
+            AttemptedQuantity = attemptedQuantity,
+            timestamp = DateTime.UtcNow
+        });
     }
 }
+

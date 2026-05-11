@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InventorySystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260511190015_InitialCreate")]
+    [Migration("20260511200303_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -411,6 +411,9 @@ namespace InventorySystem.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("FromWarehouseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdempotencyKey")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")

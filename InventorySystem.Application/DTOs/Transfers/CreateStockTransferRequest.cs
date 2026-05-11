@@ -8,6 +8,8 @@ public class CreateStockTransferRequest
 {
     public Guid FromWarehouseId { get; set; }
     public Guid ToWarehouseId { get; set; }
+    public Guid IdempotencyKey { get; set; }
+
     public DateTime TransferDate { get; set; }
     public List<CreateStockTransferItemDto> Items { get; set; } = new();
 }

@@ -1,17 +1,15 @@
-﻿// File: tests/InventorySystem.Tests.Unit/TestHelpers/FakeNotificationService.cs
-using InventorySystem.Application.Interfaces;
-
-namespace InventorySystem.Tests.Unit.TestHelpers;
+﻿using InventorySystem.Application.Interfaces;
 
 public class FakeNotificationService : INotificationService
 {
     public List<StockChangeNotification> StockChanges { get; } = new();
     public List<Guid> PurchaseOrdersReceived { get; } = new();
     public List<Guid> TransfersReceived { get; } = new();
-    public List<Guid> PurchaseOrdersCancelled { get; } = new(); 
-
-    // قائمة جديدة لمتابعة الإرسال
+    public List<Guid> PurchaseOrdersCancelled { get; } = new();
     public List<Guid> PurchaseOrdersSubmitted { get; } = new();
+
+    // ✅ جديد: قائمة لمتابعة التحويلات الفاشلة
+    public List<TransferFailedNotification> TransfersFailed { get; } = new();
 
     public Task NotifyStockChangedAsync(Guid productId, Guid warehouseId, decimal newQuantity)
     {
@@ -31,10 +29,9 @@ public class FakeNotificationService : INotificationService
         return Task.CompletedTask;
     }
 
-    // ✅ الإصلاح: إضافة إلى القائمة الصحيحة
     public Task NotifyPurchaseOrderSubmittedAsync(Guid purchaseOrderId)
     {
-        PurchaseOrdersSubmitted.Add(purchaseOrderId); 
+        PurchaseOrdersSubmitted.Add(purchaseOrderId);
         return Task.CompletedTask;
     }
 
@@ -50,8 +47,16 @@ public class FakeNotificationService : INotificationService
         return Task.CompletedTask;
     }
 
-
+    // ✅ جديد: تنفيذ إشعار فشل التحويل
+    public Task NotifyTransferFailedAsync(Guid productId, Guid warehouseId, decimal attemptedQuantity)
+    {
+        TransfersFailed.Add(new(productId, warehouseId, attemptedQuantity));
+        return Task.CompletedTask;
+    }
 }
 
 // Record بسيط للإشعارات (للتحقق في الاختبارات)
 public record StockChangeNotification(Guid ProductId, Guid WarehouseId, decimal NewQuantity, decimal? Threshold = null);
+
+// ✅ جديد: Record للتحويلات الفاشلة
+public record TransferFailedNotification(Guid ProductId, Guid WarehouseId, decimal AttemptedQuantity);

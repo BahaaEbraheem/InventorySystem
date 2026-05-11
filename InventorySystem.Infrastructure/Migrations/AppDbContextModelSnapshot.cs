@@ -410,6 +410,9 @@ namespace InventorySystem.Infrastructure.Migrations
                     b.Property<Guid>("FromWarehouseId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("IdempotencyKey")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 

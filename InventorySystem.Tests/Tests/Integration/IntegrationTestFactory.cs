@@ -3,7 +3,6 @@ using InventorySystem.Application.Interfaces;
 using InventorySystem.Domain.Entities;
 using InventorySystem.Infrastructure.Persistence;
 using InventorySystem.Infrastructure.Services;
-using InventorySystem.Tests.Unit.TestHelpers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -209,6 +208,15 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
             ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<SalesService>.Instance;
 
         return new SalesService(dbContext, notificationService);
+    }
+    // ✅ جديد: إنشاء خدمة التحويلات للاختبارات
+    public StockTransferService CreateStockTransferService()
+    {
+        var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+        return new StockTransferService(dbContext, notificationService);
     }
 
 }

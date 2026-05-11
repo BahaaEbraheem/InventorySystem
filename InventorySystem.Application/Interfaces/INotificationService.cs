@@ -14,5 +14,6 @@ public interface INotificationService
     Task NotifyPurchaseOrderCancelledAsync(Guid purchaseOrderId);
     Task NotifyTransferReceivedAsync(Guid transferId);
 
+    Task NotifyTransferFailedAsync(Guid productId, Guid warehouseId, decimal attemptedQuantity);
 }
 
