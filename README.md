@@ -436,6 +436,27 @@ flowchart TD
 
 > If the diagram does not render, open this file in GitHub or paste it into [Mermaid Live Editor](https://mermaid.live).
 
+
+
+---
+
+### ▶️ How to Run Tests Locally
+
+```bash
+# Run all tests
+dotnet test
+
+# Run only integration tests
+dotnet test tests/InventorySystem.Tests.Integration
+
+# Run only unit tests
+dotnet test tests/InventorySystem.Tests.Unit
+
+# Run with detailed output
+dotnet test --logger "console;verbosity=detailed"
+
+
+
 ---
 
 ## ✅ Next Steps (Roadmap)
