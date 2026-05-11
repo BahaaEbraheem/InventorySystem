@@ -32,7 +32,7 @@ public class Problem1_TraceabilityIntegrationTests : IClassFixture<IntegrationTe
         _reportingService = factory.CreateReportingService();
     }
 
-    #region 🎯 السيناريو الكامل: شراء من موردين متعددين → بيع → تقارير
+    #region  السيناريو الكامل: شراء من موردين متعددين → بيع → تقارير
 
     [Fact]
     public async Task Problem1_FullScenario_TrackSalesBySupplier_AndRemainingStockFromShipment()
@@ -204,7 +204,7 @@ public class Problem1_TraceabilityIntegrationTests : IClassFixture<IntegrationTe
 
     #endregion
 
-    #region 🔄 اختبار جزئي: استلام على دفعات + تتبع كل دفعة
+    #region  اختبار جزئي: استلام على دفعات + تتبع كل دفعة
 
     [Fact]
     public async Task Problem1_PartialReceipt_TracksEachBatchSeparately()
@@ -316,7 +316,7 @@ public class Problem1_TraceabilityIntegrationTests : IClassFixture<IntegrationTe
 
     #endregion
 
-    #region 📈 اختبار الأداء: تقرير بمؤشرات فعالة
+    #region  اختبار الأداء: تقرير بمؤشرات فعالة
 
     [Fact]
     public async Task Problem1_Report_WithLargeData_PerformsEfficiently()
@@ -332,7 +332,7 @@ public class Problem1_TraceabilityIntegrationTests : IClassFixture<IntegrationTe
             var poRequest = new CreatePurchaseOrderRequest
             {
                 SupplierId = supplier.Id,
-                // ✅ التصحيح: استخدام .Date لتجنب خطأ "في المستقبل"
+                //  التصحيح: استخدام .Date لتجنب خطأ "في المستقبل"
                 PurchaseDate = DateTime.UtcNow.AddDays(-i * 10).Date,
                 Items = new() { new CreatePurchaseOrderItemDto
             {
@@ -379,7 +379,6 @@ public class Problem1_TraceabilityIntegrationTests : IClassFixture<IntegrationTe
         Assert.NotEmpty(report);
         Assert.Equal(supplier.Id, report.First().SupplierId);
 
-        // ✅ التحقق من الأداء: يجب أن ينتهي في أقل من 500 مللي ثانية (مع المؤشرات)
         Assert.True(stopwatch.ElapsedMilliseconds < 500,
             $"Report took {stopwatch.ElapsedMilliseconds}ms, expected < 500ms");
     }

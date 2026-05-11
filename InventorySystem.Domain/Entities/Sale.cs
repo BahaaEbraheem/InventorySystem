@@ -13,7 +13,7 @@ namespace InventorySystem.Domain.Entities
         public Guid WarehouseId { get; set; }
         public Warehouse Warehouse { get; set; } = default!;
         public bool IsActive { get; set; } = true;
-
+        public Guid IdempotencyKey { get; set; }
         public ICollection<SaleItem> Items { get; set; } = new List<SaleItem>();
     }
 }
