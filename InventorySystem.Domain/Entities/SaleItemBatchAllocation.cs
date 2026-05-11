@@ -5,6 +5,7 @@ using System.Text;
 
 namespace InventorySystem.Domain.Entities
 {
+    //يربط كل عملية بيع بالدفعات التي أتت منها الكمية
     public class SaleItemBatchAllocation : AuditableEntity
     {
         public Guid SaleItemId { get; set; }

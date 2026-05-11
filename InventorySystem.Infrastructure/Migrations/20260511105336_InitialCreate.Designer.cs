@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InventorySystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260510214156_InitialCreate")]
+    [Migration("20260511105336_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -40,6 +40,9 @@ namespace InventorySystem.Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -108,6 +111,9 @@ namespace InventorySystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ExpectedDeliveryDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -117,8 +123,17 @@ namespace InventorySystem.Infrastructure.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ReceivedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("SupplierId")
                         .HasColumnType("uniqueidentifier");
@@ -161,6 +176,9 @@ namespace InventorySystem.Infrastructure.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("ReceivedQuantity")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("UnitCost")
                         .HasColumnType("decimal(18,2)");
 
@@ -191,6 +209,9 @@ namespace InventorySystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -208,9 +229,7 @@ namespace InventorySystem.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SaleDate");
-
-                    b.HasIndex("WarehouseId");
+                    b.HasIndex("WarehouseId", "SaleDate");
 
                     b.ToTable("Sales");
                 });
@@ -288,9 +307,9 @@ namespace InventorySystem.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SaleItemId");
-
                     b.HasIndex("StockBatchId");
+
+                    b.HasIndex("SaleItemId", "StockBatchId");
 
                     b.ToTable("SaleItemBatchAllocations");
                 });
@@ -308,6 +327,9 @@ namespace InventorySystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -316,6 +338,9 @@ namespace InventorySystem.Infrastructure.Migrations
 
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("OrderedQuantity")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
@@ -332,6 +357,18 @@ namespace InventorySystem.Infrastructure.Migrations
                     b.Property<decimal>("QuantityRemaining")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("QuantityReserved")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("ReceivedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<Guid>("SupplierId")
                         .HasColumnType("uniqueidentifier");
 
@@ -344,7 +381,9 @@ namespace InventorySystem.Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.HasIndex("ProductId", "WarehouseId", "PurchaseDate");
+                    b.HasIndex("WarehouseId");
+
+                    b.HasIndex("ProductId", "WarehouseId", "SupplierId");
 
                     b.ToTable("StockBatches");
                 });
@@ -354,6 +393,9 @@ namespace InventorySystem.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -373,6 +415,9 @@ namespace InventorySystem.Infrastructure.Migrations
 
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("ToWarehouseId")
                         .HasColumnType("uniqueidentifier");
@@ -442,6 +487,9 @@ namespace InventorySystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -472,6 +520,9 @@ namespace InventorySystem.Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -597,10 +648,26 @@ namespace InventorySystem.Infrastructure.Migrations
                     b.HasOne("InventorySystem.Domain.Entities.PurchaseOrderItem", "PurchaseOrderItem")
                         .WithMany()
                         .HasForeignKey("PurchaseOrderItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("InventorySystem.Domain.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("InventorySystem.Domain.Entities.Warehouse", "Warehouse")
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("PurchaseOrderItem");
+
+                    b.Navigation("Supplier");
+
+                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("InventorySystem.Domain.Entities.StockTransfer", b =>

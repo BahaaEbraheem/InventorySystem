@@ -7,5 +7,10 @@ public class FakeNotificationService : INotificationService
 
     public Task NotifyStockBelowThresholdAsync(Guid productId, Guid warehouseId, decimal newQuantity, decimal threshold)
         => Task.CompletedTask;
+
+    public Task NotifyPurchaseOrderReceivedAsync(Guid purchaseOrderId)
+    {
+        throw new NotImplementedException();
+    }
 }
 

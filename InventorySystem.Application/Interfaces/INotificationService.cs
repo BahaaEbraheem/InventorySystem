@@ -8,5 +8,6 @@ public interface INotificationService
 {
     Task NotifyStockChangedAsync(Guid productId, Guid warehouseId, decimal newQuantity);
     Task NotifyStockBelowThresholdAsync(Guid productId, Guid warehouseId, decimal newQuantity, decimal threshold);
+    Task NotifyPurchaseOrderReceivedAsync(Guid purchaseOrderId);
 }
 

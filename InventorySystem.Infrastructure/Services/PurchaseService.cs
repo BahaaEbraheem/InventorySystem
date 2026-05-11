@@ -1,7 +1,9 @@
 ﻿using InventorySystem.Application.DTOs.Purchase;
 using InventorySystem.Application.Interfaces;
 using InventorySystem.Domain.Entities;
+using InventorySystem.Domain.Exceptions;
 using InventorySystem.Infrastructure.Persistence;
+using InventorySystem.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventorySystem.Infrastructure.Services;
@@ -9,10 +11,11 @@ namespace InventorySystem.Infrastructure.Services;
 public class PurchaseService : IPurchaseService
 {
     private readonly AppDbContext _dbContext;
-
-    public PurchaseService(AppDbContext dbContext)
+    private readonly INotificationService _notificationService;
+    public PurchaseService(AppDbContext dbContext, INotificationService notificationService)
     {
         _dbContext = dbContext;
+        _notificationService = notificationService;
     }
 
     public async Task<CreatePurchaseOrderResponse> CreatePurchaseOrderAsync(
@@ -47,22 +50,6 @@ public class PurchaseService : IPurchaseService
             };
 
             purchaseOrder.Items.Add(poItem);
-
-            var stockBatch = new StockBatch
-            {
-                Id = Guid.NewGuid(),
-                ProductId = item.ProductId,
-                SupplierId = request.SupplierId,
-                WarehouseId = item.WarehouseId,
-                PurchaseOrderItem = poItem,
-                QuantityReceived = item.Quantity,
-                QuantityRemaining = item.Quantity,
-                PurchaseDate = request.PurchaseDate,
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = "system"
-            };
-
-            await _dbContext.StockBatches.AddAsync(stockBatch, cancellationToken);
         }
 
         await _dbContext.PurchaseOrders.AddAsync(purchaseOrder, cancellationToken);
@@ -203,6 +190,80 @@ public class PurchaseService : IPurchaseService
             }).ToList()
         };
     }
+
+
+
+
+    // ✅ دالة جديدة: تُستدعى عند وصول الشحنة فعليًا من المورد
+    public async Task<ReceivePurchaseOrderResponse> ReceivePurchaseOrderAsync(
+        Guid purchaseOrderId,
+        List<ReceiveOrderItemRequest> receivedItems, // الكمية المستلمة فعليًا لكل صنف
+        CancellationToken cancellationToken = default)
+    {
+        var purchaseOrder = await _dbContext.PurchaseOrders
+            .Include(p => p.Items)
+            .FirstOrDefaultAsync(p => p.Id == purchaseOrderId, cancellationToken);
+
+        if (purchaseOrder == null)
+            throw new NotFoundException(nameof(PurchaseOrder), purchaseOrderId);
+
+        if (purchaseOrder.Status != PurchaseOrderStatus.Submitted)
+            throw new InvalidOperationException($"Cannot receive order in status {purchaseOrder.Status}");
+
+        foreach (var received in receivedItems)
+        {
+            var poItem = purchaseOrder.Items.FirstOrDefault(i => i.Id == received.PurchaseOrderItemId);
+            if (poItem == null) continue;
+
+            // ✅ إنشاء/تحديث StockBatch للكمية المستلمة
+            var stockBatch = new StockBatch
+            {
+                Id = Guid.NewGuid(),
+                ProductId = poItem.ProductId,
+                SupplierId = purchaseOrder.SupplierId,
+                WarehouseId = poItem.WarehouseId,
+                PurchaseOrderItem = poItem,
+                OrderedQuantity = poItem.Quantity,
+                QuantityReceived = received.ReceivedQuantity, // ✅ الكمية الفعلية
+                QuantityRemaining = received.ReceivedQuantity, // ✅ متاحة للبيع فورًا
+                QuantityReserved = 0,
+                PurchaseDate = purchaseOrder.PurchaseDate,
+                ReceivedDate = DateTime.UtcNow, // ✅ تاريخ الاستلام الفعلي
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "system"
+            };
+
+            await _dbContext.StockBatches.AddAsync(stockBatch, cancellationToken);
+
+            // ✅ تحديث حالة عنصر أمر الشراء
+            poItem.ReceivedQuantity += received.ReceivedQuantity;
+        }
+
+        // ✅ تحديث حالة أمر الشراء الكلي
+        var allReceived = purchaseOrder.Items.All(i => i.ReceivedQuantity >= i.Quantity);
+        var someReceived = purchaseOrder.Items.Any(i => i.ReceivedQuantity > 0);
+
+        purchaseOrder.Status = allReceived
+            ? PurchaseOrderStatus.Received
+            : (someReceived ? PurchaseOrderStatus.PartiallyReceived : purchaseOrder.Status);
+
+        if (allReceived)
+            purchaseOrder.ReceivedDate = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // ✅ إشعار: "تم استلام طلب الشراء"
+        await _notificationService.NotifyPurchaseOrderReceivedAsync(purchaseOrderId);
+
+        return new ReceivePurchaseOrderResponse
+        {
+            PurchaseOrderId = purchaseOrder.Id,
+            Status = purchaseOrder.Status,
+            ReceivedAt = purchaseOrder.ReceivedDate
+        };
+    }
+
+
 }
 
 

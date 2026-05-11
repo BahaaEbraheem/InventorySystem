@@ -33,4 +33,14 @@ public class NotificationService : INotificationService
             Threshold = threshold
         });
     }
+
+    public async Task NotifyPurchaseOrderReceivedAsync(Guid purchaseOrderId)
+    {
+        await _hubContext.Clients.All
+            .SendAsync("PurchaseOrderReceived", new
+            {
+                purchaseOrderId,
+                timestamp = DateTime.UtcNow
+            });
+    }
 }

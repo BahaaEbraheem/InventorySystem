@@ -34,6 +34,7 @@ namespace InventorySystem.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -51,6 +52,7 @@ namespace InventorySystem.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -70,6 +72,7 @@ namespace InventorySystem.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Sku = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -95,6 +98,10 @@ namespace InventorySystem.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SupplierId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpectedDeliveryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReceivedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -119,6 +126,7 @@ namespace InventorySystem.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SaleDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     WarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -142,6 +150,8 @@ namespace InventorySystem.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FromWarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ToWarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TransferDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -173,6 +183,7 @@ namespace InventorySystem.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PurchaseOrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReceivedQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     WarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UnitCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -277,9 +288,14 @@ namespace InventorySystem.Infrastructure.Migrations
                     SupplierId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     WarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PurchaseOrderItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    OrderedQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     QuantityReceived = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     QuantityRemaining = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    QuantityReserved = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReceivedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -293,8 +309,17 @@ namespace InventorySystem.Infrastructure.Migrations
                         name: "FK_StockBatches_PurchaseOrderItems_PurchaseOrderItemId",
                         column: x => x.PurchaseOrderItemId,
                         principalTable: "PurchaseOrderItems",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_StockBatches_Suppliers_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Suppliers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_StockBatches_Warehouses_WarehouseId",
+                        column: x => x.WarehouseId,
+                        principalTable: "Warehouses",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -354,9 +379,9 @@ namespace InventorySystem.Infrastructure.Migrations
                 column: "SupplierId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SaleItemBatchAllocations_SaleItemId",
+                name: "IX_SaleItemBatchAllocations_SaleItemId_StockBatchId",
                 table: "SaleItemBatchAllocations",
-                column: "SaleItemId");
+                columns: new[] { "SaleItemId", "StockBatchId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_SaleItemBatchAllocations_StockBatchId",
@@ -374,19 +399,14 @@ namespace InventorySystem.Infrastructure.Migrations
                 column: "SaleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Sales_SaleDate",
+                name: "IX_Sales_WarehouseId_SaleDate",
                 table: "Sales",
-                column: "SaleDate");
+                columns: new[] { "WarehouseId", "SaleDate" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Sales_WarehouseId",
-                table: "Sales",
-                column: "WarehouseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StockBatches_ProductId_WarehouseId_PurchaseDate",
+                name: "IX_StockBatches_ProductId_WarehouseId_SupplierId",
                 table: "StockBatches",
-                columns: new[] { "ProductId", "WarehouseId", "PurchaseDate" });
+                columns: new[] { "ProductId", "WarehouseId", "SupplierId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_StockBatches_PurchaseOrderItemId",
@@ -397,6 +417,11 @@ namespace InventorySystem.Infrastructure.Migrations
                 name: "IX_StockBatches_SupplierId",
                 table: "StockBatches",
                 column: "SupplierId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StockBatches_WarehouseId",
+                table: "StockBatches",
+                column: "WarehouseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StockTransferItems_ProductId",

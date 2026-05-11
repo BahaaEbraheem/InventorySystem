@@ -44,7 +44,26 @@ namespace InventorySystem.Infrastructure.Persistence
                 }
             }
 
-            // StockTransfer relationships
+            // ✅ StockBatch relationships - منع الـ Cascade للحفاظ على التتبع
+            modelBuilder.Entity<StockBatch>()
+                .HasOne(sb => sb.Supplier)
+                .WithMany()
+                .HasForeignKey(sb => sb.SupplierId)
+                .OnDelete(DeleteBehavior.NoAction);  // ✅ لا تحذف الشحنات عند حذف المورد
+
+            modelBuilder.Entity<StockBatch>()
+                .HasOne(sb => sb.Warehouse)
+                .WithMany()
+                .HasForeignKey(sb => sb.WarehouseId)
+                .OnDelete(DeleteBehavior.NoAction);  // ✅ لا تحذف الشحنات عند حذف المستودع
+
+            modelBuilder.Entity<StockBatch>()
+                .HasOne(sb => sb.PurchaseOrderItem)
+                .WithMany()
+                .HasForeignKey(sb => sb.PurchaseOrderItemId)
+                .OnDelete(DeleteBehavior.NoAction);  // ✅ لا تحذف الشحنات عند حذف عنصر الطلب
+
+            // ✅ StockTransfer relationships
             modelBuilder.Entity<StockTransfer>()
                 .HasOne(st => st.FromWarehouse)
                 .WithMany()
@@ -57,7 +76,7 @@ namespace InventorySystem.Infrastructure.Persistence
                 .HasForeignKey(st => st.ToWarehouseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // SaleItemBatchAllocation relationships
+            // ✅ SaleItemBatchAllocation relationships
             modelBuilder.Entity<SaleItemBatchAllocation>()
                 .HasOne(a => a.SaleItem)
                 .WithMany(i => i.BatchAllocations)
@@ -70,18 +89,18 @@ namespace InventorySystem.Infrastructure.Persistence
                 .HasForeignKey(a => a.StockBatchId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Indexes
+            // ✅ Indexes - بسيطة وفعالة
             modelBuilder.Entity<StockBatch>()
-                .HasIndex(x => new { x.ProductId, x.WarehouseId, x.PurchaseDate });
-
-            modelBuilder.Entity<Sale>()
-                .HasIndex(x => x.SaleDate);
-
-            modelBuilder.Entity<Sale>()
-                .HasIndex(x => x.WarehouseId);
+                .HasIndex(x => new { x.ProductId, x.WarehouseId, x.SupplierId });
 
             modelBuilder.Entity<StockBatch>()
-                .HasIndex(x => x.SupplierId);
+                .HasIndex(x => x.PurchaseOrderItemId);
+
+            modelBuilder.Entity<Sale>()
+                .HasIndex(x => new { x.WarehouseId, x.SaleDate });
+
+            modelBuilder.Entity<SaleItemBatchAllocation>()
+                .HasIndex(x => new { x.SaleItemId, x.StockBatchId });
 
             modelBuilder.Entity<Product>()
                 .HasIndex(x => x.CategoryId);

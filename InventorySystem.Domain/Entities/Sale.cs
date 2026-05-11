@@ -12,6 +12,7 @@ namespace InventorySystem.Domain.Entities
 
         public Guid WarehouseId { get; set; }
         public Warehouse Warehouse { get; set; } = default!;
+        public bool IsActive { get; set; } = true;
 
         public ICollection<SaleItem> Items { get; set; } = new List<SaleItem>();
     }
