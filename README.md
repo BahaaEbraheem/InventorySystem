@@ -285,11 +285,8 @@ This ensures the project runs **out of the box** — no manual setup required.
 # Run all tests
 dotnet test
 
-# Run only integration tests
-dotnet test tests/InventorySystem.Tests.Integration
-
-# Run only unit tests
-dotnet test tests/InventorySystem.Tests.Unit
+# Run only ( integration && unit ) tests
+dotnet test InventorySystem.Tests
 
 # Run with detailed output
 dotnet test --logger "console;verbosity=detailed"

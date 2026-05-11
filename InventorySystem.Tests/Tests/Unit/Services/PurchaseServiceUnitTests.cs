@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace InventorySystem.Tests.Unit.Services;
+namespace InventorySystem.Tests.Tests.Unit.Services;
 
 /// <summary>
 /// Unit tests for PurchaseService business logic.

@@ -2,7 +2,7 @@ using InventorySystem.Domain.Entities;
 using InventorySystem.Shared.Enums;
 using Xunit;
 
-namespace InventorySystem.Tests.Unit.Domain;
+namespace InventorySystem.Tests.Tests.Unit.Domain;
 
 /// <summary>
 /// Unit tests for pure domain entity logic — no database, no mocks.

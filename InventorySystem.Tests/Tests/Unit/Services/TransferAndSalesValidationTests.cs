@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
-namespace InventorySystem.Tests.Unit.Services;
+namespace InventorySystem.Tests.Tests.Unit.Services;
 
 /// <summary>
 /// Unit tests for SalesService and StockTransferService input validation.
@@ -62,11 +62,11 @@ public class SalesServiceValidationTests
     {
         // Minimal DbContext — validation throws before any DB call
         var options = new Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<
-            InventorySystem.Infrastructure.Persistence.AppDbContext>()
+            Infrastructure.Persistence.AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        var db = new InventorySystem.Infrastructure.Persistence.AppDbContext(options);
+        var db = new Infrastructure.Persistence.AppDbContext(options);
         var notif = new Mock<INotificationService>().Object;
         return new SalesService(db, notif);
     }
@@ -140,11 +140,11 @@ public class StockTransferServiceValidationTests
         // Arrange: insert existing transfer with same IdempotencyKey
         var idempotencyKey = Guid.NewGuid();
         var options = new Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<
-            InventorySystem.Infrastructure.Persistence.AppDbContext>()
+            Infrastructure.Persistence.AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        var db = new InventorySystem.Infrastructure.Persistence.AppDbContext(options);
+        var db = new Infrastructure.Persistence.AppDbContext(options);
 
         // Seed an existing transfer
         var existingTransfer = new InventorySystem.Domain.Entities.StockTransfer
@@ -181,11 +181,11 @@ public class StockTransferServiceValidationTests
     private static StockTransferService BuildService()
     {
         var options = new Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<
-            InventorySystem.Infrastructure.Persistence.AppDbContext>()
+            Infrastructure.Persistence.AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        var db = new InventorySystem.Infrastructure.Persistence.AppDbContext(options);
+        var db = new Infrastructure.Persistence.AppDbContext(options);
         var notif = new Mock<INotificationService>().Object;
         return new StockTransferService(db, notif);
     }
