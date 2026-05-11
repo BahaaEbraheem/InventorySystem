@@ -49,7 +49,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     {
         using var scope = Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await dbContext.Database.EnsureCreatedAsync(); // ✅ إنشاء الجداول إذا لم تكن موجودة
+        await dbContext.Database.EnsureCreatedAsync();
     }
 
     public new async Task DisposeAsync()
