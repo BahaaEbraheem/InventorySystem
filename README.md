@@ -606,7 +606,7 @@ This project is licensed under the **MIT License** — free to use, modify, and 
 
 ✨ **Developed by [Bahaa Ebraheem](https://github.com/BahaaEbraheem)**
 
-📅 Last Updated: May 2025
+📅 Last Updated: 12 May 2026
 
 🎯 *Solving real inventory problems with scalable, maintainable solutions*
 
