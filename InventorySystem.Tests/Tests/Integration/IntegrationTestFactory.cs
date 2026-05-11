@@ -219,5 +219,67 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
         return new StockTransferService(dbContext, notificationService);
     }
 
+
+    public async Task<Guid> CreateSaleAsync(Guid productId, Guid warehouseId, decimal quantity, DateTime? saleDate = null)
+    {
+        var salesService = CreateSalesService();
+
+        var saleRequest = new InventorySystem.Application.DTOs.Sales.CreateSaleRequest
+        {
+            IdempotencyKey = Guid.NewGuid(),
+            SaleDate = saleDate ?? DateTime.UtcNow,
+            Items = new()
+        {
+            new InventorySystem.Application.DTOs.Sales.CreateSaleItemDto
+            {
+                ProductId = productId,
+                WarehouseId = warehouseId,
+                Quantity = quantity
+            }
+        }
+        };
+
+        var response = await salesService.CreateSaleAsync(saleRequest);
+        return response.SaleId;
+    }
+
+    public async Task<ProductCategory> CreateCategoryAsync(string name)
+    {
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var category = new ProductCategory
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "integration_test"
+        };
+
+        dbContext.ProductCategories.Add(category);
+        await dbContext.SaveChangesAsync();
+        return category;
+    }
+    public async Task<Product> CreateProductAsync(string name, Guid categoryId)
+    {
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var product = new Product
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            IsActive = true,
+            CategoryId = categoryId,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "integration_test"
+        };
+
+        dbContext.Products.Add(product);
+        await dbContext.SaveChangesAsync();
+        return product;
+    }
+
 }
 
