@@ -8,5 +8,7 @@ namespace InventorySystem.Domain.Entities
     public class Supplier : AuditableEntity
     {
         public string Name { get; set; } = default!;
+        public bool IsActive { get; set; } = true;
+
     }
 }

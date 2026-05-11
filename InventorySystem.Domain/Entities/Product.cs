@@ -9,7 +9,7 @@ namespace InventorySystem.Domain.Entities
     {
         public string Name { get; set; } = default!;
         public string? Sku { get; set; }
-
+        public bool IsActive { get; set; } = true;
         public Guid CategoryId { get; set; }
         public ProductCategory Category { get; set; } = default!;
     }

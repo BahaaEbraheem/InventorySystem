@@ -3,5 +3,6 @@
   <Project Path="InventorySystem.Application/InventorySystem.Application.csproj" />
   <Project Path="InventorySystem.Domain/InventorySystem.Domain.csproj" />
   <Project Path="InventorySystem.Infrastructure/InventorySystem.Infrastructure.csproj" />
+  <Project Path="InventorySystem.Shared/InventorySystem.Shared.csproj" />
   <Project Path="InventorySystem.Tests/InventorySystem.Tests.csproj" />
 </Solution>

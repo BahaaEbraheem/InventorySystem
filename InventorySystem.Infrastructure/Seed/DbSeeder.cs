@@ -13,20 +13,20 @@ public static class DbSeeder
             return;
 
         // Warehouses
-        var warehouse1 = new Warehouse { Id = Guid.NewGuid(), Name = "Main Warehouse", CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
-        var warehouse2 = new Warehouse { Id = Guid.NewGuid(), Name = "Branch Warehouse", CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
+        var warehouse1 = new Warehouse { Id = Guid.NewGuid(), Name = "Main Warehouse",IsActive=true, CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
+        var warehouse2 = new Warehouse { Id = Guid.NewGuid(), Name = "Branch Warehouse", IsActive = true, CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
 
         // Suppliers
-        var supplier1 = new Supplier { Id = Guid.NewGuid(), Name = "Supplier A", CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
-        var supplier2 = new Supplier { Id = Guid.NewGuid(), Name = "Supplier B", CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
+        var supplier1 = new Supplier { Id = Guid.NewGuid(), Name = "Supplier A", IsActive = true, CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
+        var supplier2 = new Supplier { Id = Guid.NewGuid(), Name = "Supplier B", IsActive = true, CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
 
         // Categories
         var category1 = new ProductCategory { Id = Guid.NewGuid(), Name = "Electronics", CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
         var category2 = new ProductCategory { Id = Guid.NewGuid(), Name = "Food", CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
 
         // Products
-        var product1 = new Product { Id = Guid.NewGuid(), Name = "Laptop", CategoryId = category1.Id, CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
-        var product2 = new Product { Id = Guid.NewGuid(), Name = "Chocolate", CategoryId = category2.Id, CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
+        var product1 = new Product { Id = Guid.NewGuid(), Name = "Laptop", IsActive = true, CategoryId = category1.Id, CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
+        var product2 = new Product { Id = Guid.NewGuid(), Name = "Chocolate", IsActive = true, CategoryId = category2.Id, CreatedAt = DateTime.UtcNow, CreatedBy = "seed" };
 
         await db.Warehouses.AddRangeAsync(warehouse1, warehouse2);
         await db.Suppliers.AddRangeAsync(supplier1, supplier2);

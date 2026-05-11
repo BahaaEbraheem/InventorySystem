@@ -8,5 +8,7 @@ namespace InventorySystem.Application.Interfaces
     public interface IPurchaseService
     {
         Task<CreatePurchaseOrderResponse> CreatePurchaseOrderAsync(CreatePurchaseOrderRequest request, CancellationToken cancellationToken = default);
+        Task<PurchaseOrderDto?> GetPurchaseOrderByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
     }
 }

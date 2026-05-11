@@ -8,6 +8,8 @@ namespace InventorySystem.Domain.Entities
     public class Warehouse : AuditableEntity
     {
         public string Name { get; set; } = default!;
+        public bool IsActive { get; set; } = true;
+
         public string? Location { get; set; }
     }
 }
