@@ -1,28 +1,58 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
-  </ItemGroup>
+		<!-- ✅ حاسم لـ WebApplicationFactory واختبارات التكامل -->
+		<PreserveCompilationContext>true</PreserveCompilationContext>
 
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
+		<!-- ✅ ضمان نسخ جميع الاعتمادات للمجلد النهائي -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
-  <ItemGroup>
-    <ProjectReference Include="..\InventorySystem.Application\InventorySystem.Application.csproj" />
-    <ProjectReference Include="..\InventorySystem.Domain\InventorySystem.Domain.csproj" />
-    <ProjectReference Include="..\InventorySystem.Infrastructure\InventorySystem.Infrastructure.csproj" />
-  </ItemGroup>
+		<!-- ✅ تعطيل Shadow Copy لتجنب مشاكل الملفات أثناء الاختبار -->
+		<ShadowCopyFiles>false</ShadowCopyFiles>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- حزم الاختبار -->
+		<PackageReference Include="coverlet.collector" Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+		<PackageReference Include="xunit" Version="2.9.3" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- ✅ مرجع مشاريع الطبقات -->
+		<ProjectReference Include="..\InventorySystem.Application\InventorySystem.Application.csproj" />
+		<ProjectReference Include="..\InventorySystem.Domain\InventorySystem.Domain.csproj" />
+		<ProjectReference Include="..\InventorySystem.Infrastructure\InventorySystem.Infrastructure.csproj" />
+
+		<!-- ✅ ⚠️ حاسم: مرجع مشروع الـ API لـ WebApplicationFactory<Program> -->
+		<ProjectReference Include="..\InventorySystem.Api\InventorySystem.Api.csproj">
+			<OutputItemType>Content</OutputItemType>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</ProjectReference>
+	</ItemGroup>
+
+	<!-- ✅ ضمان نسخ ملفات الإعدادات للاختبارات -->
+	<ItemGroup>
+		<Content Include="..\InventorySystem.Api\appsettings*.json">
+			<Link>appsettings%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
 </Project>

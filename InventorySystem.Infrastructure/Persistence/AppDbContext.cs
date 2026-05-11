@@ -44,24 +44,30 @@ namespace InventorySystem.Infrastructure.Persistence
                 }
             }
 
-            // ✅ StockBatch relationships - منع الـ Cascade للحفاظ على التتبع
             modelBuilder.Entity<StockBatch>()
                 .HasOne(sb => sb.Supplier)
                 .WithMany()
                 .HasForeignKey(sb => sb.SupplierId)
-                .OnDelete(DeleteBehavior.NoAction);  // ✅ لا تحذف الشحنات عند حذف المورد
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<StockBatch>()
                 .HasOne(sb => sb.Warehouse)
                 .WithMany()
                 .HasForeignKey(sb => sb.WarehouseId)
-                .OnDelete(DeleteBehavior.NoAction);  // ✅ لا تحذف الشحنات عند حذف المستودع
+                .OnDelete(DeleteBehavior.NoAction); 
 
             modelBuilder.Entity<StockBatch>()
                 .HasOne(sb => sb.PurchaseOrderItem)
                 .WithMany()
                 .HasForeignKey(sb => sb.PurchaseOrderItemId)
-                .OnDelete(DeleteBehavior.NoAction);  // ✅ لا تحذف الشحنات عند حذف عنصر الطلب
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // في AppDbContext.OnModelCreating
+            modelBuilder.Entity<StockBatch>()
+                .Property(b => b.RowVersion)
+                .IsRowVersion()  
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); 
+
 
             // ✅ StockTransfer relationships
             modelBuilder.Entity<StockTransfer>()

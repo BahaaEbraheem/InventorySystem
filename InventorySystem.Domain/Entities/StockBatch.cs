@@ -10,7 +10,7 @@ namespace InventorySystem.Domain.Entities
     public class StockBatch : AuditableEntity
     {
         public Guid ProductId { get; set; }
-        public Guid SupplierId { get; set; }
+        public Guid SupplierId { get; set; }        // المورد الأصلي ✅
         public Supplier Supplier { get; set; } = default!;
         public Guid WarehouseId { get; set; }
         public Warehouse Warehouse { get; set; } = default!;
@@ -40,6 +40,6 @@ namespace InventorySystem.Domain.Entities
         public bool IsFullyReceived => QuantityReceived >= OrderedQuantity;
 
         [Timestamp]
-        public byte[] RowVersion { get; set; }
+        public byte[]? RowVersion { get; set; }
     }
 }

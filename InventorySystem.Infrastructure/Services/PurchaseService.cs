@@ -4,7 +4,9 @@ using InventorySystem.Domain.Entities;
 using InventorySystem.Domain.Exceptions;
 using InventorySystem.Infrastructure.Persistence;
 using InventorySystem.Shared.Enums;
+using InventorySystem.Shared.Responses;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace InventorySystem.Infrastructure.Services;
 
@@ -12,8 +14,10 @@ public class PurchaseService : IPurchaseService
 {
     private readonly AppDbContext _dbContext;
     private readonly INotificationService _notificationService;
-    public PurchaseService(AppDbContext dbContext, INotificationService notificationService)
+    private readonly ILogger<PurchaseService> _logger;
+    public PurchaseService(ILogger<PurchaseService> logger,AppDbContext dbContext, INotificationService notificationService)
     {
+        _logger = logger;
         _dbContext = dbContext;
         _notificationService = notificationService;
     }
@@ -171,6 +175,9 @@ public class PurchaseService : IPurchaseService
             Id = purchaseOrder.Id,
             SupplierId = purchaseOrder.SupplierId,
             SupplierName = purchaseOrder.Supplier?.Name,
+
+            Status = purchaseOrder.Status,
+
             PurchaseDate = purchaseOrder.PurchaseDate,
             CreatedAt = purchaseOrder.CreatedAt,
             CreatedBy = purchaseOrder.CreatedBy,
@@ -191,78 +198,236 @@ public class PurchaseService : IPurchaseService
         };
     }
 
-
-
-
-    // ✅ دالة جديدة: تُستدعى عند وصول الشحنة فعليًا من المورد
-    public async Task<ReceivePurchaseOrderResponse> ReceivePurchaseOrderAsync(
-        Guid purchaseOrderId,
-        List<ReceiveOrderItemRequest> receivedItems, // الكمية المستلمة فعليًا لكل صنف
-        CancellationToken cancellationToken = default)
+    public async Task<BaseResponse<PurchaseOrderDto>> SubmitPurchaseOrderAsync(
+    Guid purchaseOrderId,
+    CancellationToken cancellationToken = default)
     {
-        var purchaseOrder = await _dbContext.PurchaseOrders
-            .Include(p => p.Items)
-            .FirstOrDefaultAsync(p => p.Id == purchaseOrderId, cancellationToken);
-
-        if (purchaseOrder == null)
-            throw new NotFoundException(nameof(PurchaseOrder), purchaseOrderId);
-
-        if (purchaseOrder.Status != PurchaseOrderStatus.Submitted)
-            throw new InvalidOperationException($"Cannot receive order in status {purchaseOrder.Status}");
-
-        foreach (var received in receivedItems)
+        try
         {
-            var poItem = purchaseOrder.Items.FirstOrDefault(i => i.Id == received.PurchaseOrderItemId);
-            if (poItem == null) continue;
+            //  جلب الطلب مع العناصر للتحقق
+            var purchaseOrder = await _dbContext.PurchaseOrders
+                .Include(p => p.Items)
+                .FirstOrDefaultAsync(p => p.Id == purchaseOrderId, cancellationToken);
 
-            // ✅ إنشاء/تحديث StockBatch للكمية المستلمة
-            var stockBatch = new StockBatch
+            if (purchaseOrder == null)
+                return BaseResponse<PurchaseOrderDto>.NotFound(
+                    $"Purchase order with id '{purchaseOrderId}' not found");
+
+            //  قاعدة العمل: الإرسال مسموح فقط من حالة المسودة
+            if (purchaseOrder.Status != PurchaseOrderStatus.Draft)
+                return BaseResponse<PurchaseOrderDto>.ErrorResponse(
+                    ResponseCodes.BusinessRuleViolation,
+                    $"Cannot submit order in status '{purchaseOrder.Status}'. Only 'Draft' orders can be submitted.");
+
+            //  منع إرسال طلب فارغ
+            if (!purchaseOrder.Items.Any())
+                return BaseResponse<PurchaseOrderDto>.ErrorResponse(
+                    ResponseCodes.ValidationError,
+                    "Cannot submit an empty purchase order. Add at least one item.");
+
+            //  التحقق من أن جميع العناصر صالحة (منتج/مستودع نشط)
+            var invalidItems = new List<string>();
+            foreach (var item in purchaseOrder.Items)
             {
-                Id = Guid.NewGuid(),
-                ProductId = poItem.ProductId,
-                SupplierId = purchaseOrder.SupplierId,
-                WarehouseId = poItem.WarehouseId,
-                PurchaseOrderItem = poItem,
-                OrderedQuantity = poItem.Quantity,
-                QuantityReceived = received.ReceivedQuantity, // ✅ الكمية الفعلية
-                QuantityRemaining = received.ReceivedQuantity, // ✅ متاحة للبيع فورًا
-                QuantityReserved = 0,
-                PurchaseDate = purchaseOrder.PurchaseDate,
-                ReceivedDate = DateTime.UtcNow, // ✅ تاريخ الاستلام الفعلي
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = "system"
-            };
+                var productActive = await _dbContext.Products
+                    .AnyAsync(p => p.Id == item.ProductId && p.IsActive, cancellationToken);
+                if (!productActive)
+                    invalidItems.Add($"Product {item.ProductId} is inactive");
 
-            await _dbContext.StockBatches.AddAsync(stockBatch, cancellationToken);
+                var warehouseActive = await _dbContext.Warehouses
+                    .AnyAsync(w => w.Id == item.WarehouseId && w.IsActive, cancellationToken);
+                if (!warehouseActive)
+                    invalidItems.Add($"Warehouse {item.WarehouseId} is inactive");
+            }
 
-            // ✅ تحديث حالة عنصر أمر الشراء
-            poItem.ReceivedQuantity += received.ReceivedQuantity;
+            if (invalidItems.Any())
+                return BaseResponse<PurchaseOrderDto>.ErrorResponse(
+                    ResponseCodes.ValidationError,
+                    "Order contains invalid items",
+                    invalidItems.Select(f => new ResponseError("Items", "INVALID_ITEM", f)).ToList());
+
+            //  تغيير الحالة وتحديث الطوابع الزمنية
+            purchaseOrder.Status = PurchaseOrderStatus.Submitted;
+            purchaseOrder.ModifiedAt = DateTime.UtcNow;
+            purchaseOrder.ModifiedBy = "system"; // ⚠️ استبدل بـ User.Identity.Name في الإنتاج
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            //  إشعار: تم إرسال الطلب للمورد
+            await _notificationService.NotifyPurchaseOrderSubmittedAsync(purchaseOrder.Id);
+
+            //  إرجاع النتيجة
+            var dto = await GetPurchaseOrderByIdAsync(purchaseOrder.Id, cancellationToken);
+            return BaseResponse<PurchaseOrderDto>.SuccessResponse(
+                dto!,
+                $"Purchase order submitted successfully. Status: {PurchaseOrderStatus.Submitted}");
         }
-
-        // ✅ تحديث حالة أمر الشراء الكلي
-        var allReceived = purchaseOrder.Items.All(i => i.ReceivedQuantity >= i.Quantity);
-        var someReceived = purchaseOrder.Items.Any(i => i.ReceivedQuantity > 0);
-
-        purchaseOrder.Status = allReceived
-            ? PurchaseOrderStatus.Received
-            : (someReceived ? PurchaseOrderStatus.PartiallyReceived : purchaseOrder.Status);
-
-        if (allReceived)
-            purchaseOrder.ReceivedDate = DateTime.UtcNow;
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        // ✅ إشعار: "تم استلام طلب الشراء"
-        await _notificationService.NotifyPurchaseOrderReceivedAsync(purchaseOrderId);
-
-        return new ReceivePurchaseOrderResponse
+        catch (DbUpdateConcurrencyException ex)
         {
-            PurchaseOrderId = purchaseOrder.Id,
-            Status = purchaseOrder.Status,
-            ReceivedAt = purchaseOrder.ReceivedDate
-        };
+            _logger.LogError(ex, "Concurrency conflict while submitting purchase order {OrderId}", purchaseOrderId);
+            return BaseResponse<PurchaseOrderDto>.ErrorResponse(
+                ResponseCodes.ConcurrencyError,
+                "The order was modified by another user. Please refresh and try again.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while submitting purchase order {OrderId}", purchaseOrderId);
+            return BaseResponse<PurchaseOrderDto>.InternalError("An unexpected error occurred while submitting the order.");
+        }
     }
 
+
+
+    public async Task<BaseResponse<ReceivePurchaseOrderResponse>> ReceivePurchaseOrderAsync(
+        Guid purchaseOrderId,
+        List<ReceiveOrderItemRequest> receivedItems,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var purchaseOrder = await _dbContext.PurchaseOrders
+                .Include(p => p.Items)
+                .FirstOrDefaultAsync(p => p.Id == purchaseOrderId, cancellationToken);
+
+            if (purchaseOrder == null)
+                return BaseResponse<ReceivePurchaseOrderResponse>.NotFound(
+                    $"Purchase order with id '{purchaseOrderId}' not found");
+
+            // ✅ التحقق من الحالة المسموح بها
+            if (purchaseOrder.Status != PurchaseOrderStatus.Submitted &&
+                purchaseOrder.Status != PurchaseOrderStatus.PartiallyReceived)
+            {
+                return BaseResponse<ReceivePurchaseOrderResponse>.ErrorResponse(
+                    ResponseCodes.BusinessRuleViolation,
+                    $"Cannot receive order in status '{purchaseOrder.Status}'. Expected 'Submitted' or 'PartiallyReceived'.");
+            }
+
+            var totalReceived = 0m;
+
+            foreach (var received in receivedItems)
+            {
+                var poItem = purchaseOrder.Items.FirstOrDefault(i => i.Id == received.PurchaseOrderItemId);
+                if (poItem == null) continue;
+
+                // ✅ إنشاء StockBatch
+                var stockBatch = new StockBatch
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = poItem.ProductId,
+                    SupplierId = purchaseOrder.SupplierId,
+                    WarehouseId = poItem.WarehouseId,
+                    PurchaseOrderItemId = poItem.Id,  // ✅ استخدم الـ Id فقط
+                    OrderedQuantity = poItem.Quantity,
+                    QuantityReceived = received.ReceivedQuantity,
+                    QuantityRemaining = received.ReceivedQuantity,
+                    QuantityReserved = 0,
+                    PurchaseDate = purchaseOrder.PurchaseDate,
+                    ReceivedDate = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "system",
+                    RowVersion = new byte[8]  // ✅ قيمة افتراضية
+                };
+
+                await _dbContext.StockBatches.AddAsync(stockBatch, cancellationToken);
+                poItem.ReceivedQuantity += received.ReceivedQuantity;
+                totalReceived += received.ReceivedQuantity;
+            }
+
+            // ✅ تحديث حالة الطلب
+            var allReceived = purchaseOrder.Items.All(i => i.ReceivedQuantity >= i.Quantity);
+            var someReceived = purchaseOrder.Items.Any(i => i.ReceivedQuantity > 0);
+
+            purchaseOrder.Status = allReceived
+                ? PurchaseOrderStatus.Received
+                : (someReceived ? PurchaseOrderStatus.PartiallyReceived : purchaseOrder.Status);
+
+            if (allReceived)
+                purchaseOrder.ReceivedDate = DateTime.UtcNow;
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _notificationService.NotifyPurchaseOrderReceivedAsync(purchaseOrderId);
+
+            return BaseResponse<ReceivePurchaseOrderResponse>.SuccessResponse(
+                new ReceivePurchaseOrderResponse
+                {
+                    PurchaseOrderId = purchaseOrder.Id,
+                    Status = purchaseOrder.Status,
+                    ReceivedAt = purchaseOrder.ReceivedDate,
+                    TotalReceivedQuantity = totalReceived
+                },
+                $"Purchase order received successfully. Status: {purchaseOrder.Status}");
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogError(ex, "Concurrency conflict while receiving purchase order {OrderId}", purchaseOrderId);
+            return BaseResponse<ReceivePurchaseOrderResponse>.ErrorResponse(
+                ResponseCodes.ConcurrencyError,
+                "The order was modified by another user. Please refresh and try again.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while receiving purchase order {OrderId}", purchaseOrderId);
+            return BaseResponse<ReceivePurchaseOrderResponse>.InternalError(
+                "An unexpected error occurred while receiving the order.");
+        }
+    }
+    public async Task<BaseResponse<PurchaseOrderDto>> CancelPurchaseOrderAsync(
+    Guid purchaseOrderId,
+    CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var purchaseOrder = await _dbContext.PurchaseOrders
+                .Include(p => p.Items)
+                .FirstOrDefaultAsync(p => p.Id == purchaseOrderId, cancellationToken);
+
+            if (purchaseOrder == null)
+                return BaseResponse<PurchaseOrderDto>.NotFound(
+                    $"Purchase order with id '{purchaseOrderId}' not found");
+
+            // ✅ قاعدة العمل: الإلغاء مسموح فقط من الحالات المسموح بها
+            if (!purchaseOrder.CanBeCancelled())
+            {
+                return BaseResponse<PurchaseOrderDto>.ErrorResponse(
+                    ResponseCodes.BusinessRuleViolation,
+                    $"Cannot cancel order in status '{purchaseOrder.Status}'. " +
+                    $"Only 'Draft' or 'Submitted' orders can be cancelled.");
+            }
+
+            // ✅ تحديث الحالة
+            purchaseOrder.Status = PurchaseOrderStatus.Cancelled;
+            purchaseOrder.ModifiedAt = DateTime.UtcNow;
+            purchaseOrder.ModifiedBy = "system"; // ⚠️ استبدل بـ User.Identity.Name في الإنتاج
+
+            // ⚠️ ملاحظة: إذا كان هناك حجز مخزون مرتبط بهذا الطلب، يجب إلغاؤه هنا
+            // مثال: تحديث أي StockBatch مرتبط بـ QuantityReserved = 0
+            // (يمكن إضافته لاحقًا حسب متطلبات العمل)
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            // ✅ إشعار: تم إلغاء الطلب
+            await _notificationService.NotifyPurchaseOrderCancelledAsync(purchaseOrder.Id);
+
+            // ✅ إرجاع النتيجة
+            var dto = await GetPurchaseOrderByIdAsync(purchaseOrder.Id, cancellationToken);
+            return BaseResponse<PurchaseOrderDto>.SuccessResponse(
+                dto!,
+                $"Purchase order cancelled successfully. Status: {PurchaseOrderStatus.Cancelled}");
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogError(ex, "Concurrency conflict while cancelling purchase order {OrderId}", purchaseOrderId);
+            return BaseResponse<PurchaseOrderDto>.ErrorResponse(
+                ResponseCodes.ConcurrencyError,
+                "The order was modified by another user. Please refresh and try again.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while cancelling purchase order {OrderId}", purchaseOrderId);
+            return BaseResponse<PurchaseOrderDto>.InternalError(
+                "An unexpected error occurred while cancelling the order.");
+        }
+    }
 
 }
 

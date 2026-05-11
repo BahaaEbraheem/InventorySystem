@@ -18,104 +18,131 @@ public class SalesService : ISalesService
         _notificationService = notificationService;
     }
 
-    public async Task<CreateSaleResponse> CreateSaleAsync(CreateSaleRequest request, CancellationToken cancellationToken = default)
+    public async Task<CreateSaleResponse> CreateSaleAsync(
+       CreateSaleRequest request,
+       CancellationToken cancellationToken = default)
     {
-        // IsolationLevel.Serializable لتفادي الـ race conditions
-        using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        // ✅ الحصول على استراتيجية التنفيذ لدعم إعادة المحاولة
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
 
-        var sale = new Sale
+        return await strategy.ExecuteAsync(async () =>
         {
-            Id = Guid.NewGuid(),
-            SaleDate = request.SaleDate,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = "system"
-        };
+            using var transaction = await _dbContext.Database.BeginTransactionAsync(
+                System.Data.IsolationLevel.Serializable, cancellationToken);
 
-        foreach (var item in request.Items)
-        {
-            var saleItem = new SaleItem
+            try
             {
-                Id = Guid.NewGuid(),
-                Sale = sale,
-                ProductId = item.ProductId,
-                Quantity = item.Quantity,
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = "system"
-            };
+                // ✅ 1. التحقق من أن المستودع موجود ونشط (مهم لـ FK)
+                var warehouse = await _dbContext.Warehouses
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(w => w.Id == request.Items.First().WarehouseId && w.IsActive, cancellationToken);
 
-            sale.Items.Add(saleItem);
+                if (warehouse == null)
+                    throw new InvalidOperationException($"Warehouse not found or inactive");
 
-            // 1) اجلب كل الـ StockBatches المتاحة لهذا المنتج في هذا المخزن بالترتيب (FIFO)
-            var batches = await _dbContext.StockBatches
-                .Where(b =>
-                    b.ProductId == item.ProductId &&
-                    b.WarehouseId == item.WarehouseId &&
-                    b.QuantityRemaining > 0)
-                .OrderBy(b => b.PurchaseDate)
-                .ThenBy(b => b.CreatedAt)
-                .ToListAsync(cancellationToken);
-
-            var totalAvailable = batches.Sum(b => b.QuantityRemaining);
-            if (totalAvailable < item.Quantity)
-            {
-                throw new InvalidOperationException($"Insufficient stock for product {item.ProductId} in warehouse {item.WarehouseId}.");
-            }
-
-            var remainingToAllocate = item.Quantity;
-
-            foreach (var batch in batches)
-            {
-                if (remainingToAllocate <= 0)
-                    break;
-
-                var allocateQty = Math.Min(batch.QuantityRemaining, remainingToAllocate);
-
-                batch.QuantityRemaining -= allocateQty;
-                remainingToAllocate -= allocateQty;
-
-                var allocation = new SaleItemBatchAllocation
+                // ✅ 2. إنشاء عملية البيع
+                var sale = new Sale
                 {
                     Id = Guid.NewGuid(),
-                    SaleItem = saleItem,
-                    StockBatch = batch,
-                    Quantity = allocateQty,
+                    WarehouseId = warehouse.Id,  // ✅ تعيين الـ FK صراحةً
+                    SaleDate = request.SaleDate,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "system"
                 };
 
-                saleItem.BatchAllocations.Add(allocation);
-                _dbContext.SaleItemBatchAllocations.Add(allocation);
-                _dbContext.StockBatches.Update(batch);
+                // ✅ 3. إضافة البيع للـ Context أولاً (لضمان توليد الـ Id)
+                await _dbContext.Sales.AddAsync(sale, cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken);  // ✅ حفظ لضمان وجود الـ Sale
 
-                //  إشعار بتغيير المخزون
-                await _notificationService.NotifyStockChangedAsync(
-                    batch.ProductId,
-                    batch.WarehouseId,
-                    batch.QuantityRemaining
-                );
-
-                //  إشعار بانخفاض المخزون تحت الحد
-                decimal threshold = 5; // لاحقًا نقرأه من جدول Thresholds
-                if (batch.QuantityRemaining < threshold)
+                foreach (var item in request.Items)
                 {
-                    await _notificationService.NotifyStockBelowThresholdAsync(
-                        batch.ProductId,
-                        batch.WarehouseId,
-                        batch.QuantityRemaining,
-                        threshold
-                    );
+                    // ✅ 4. إنشاء عنصر البيع مع تعيين الـ FKs صراحةً
+                    var saleItem = new SaleItem
+                    {
+                        Id = Guid.NewGuid(),
+                        SaleId = sale.Id,           // ✅ تعيين الـ FK صراحةً
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = "system"
+                    };
+
+                    await _dbContext.SaleItems.AddAsync(saleItem, cancellationToken);
+                    await _dbContext.SaveChangesAsync(cancellationToken);  // ✅ حفظ لضمان وجود الـ SaleItem
+
+
+
+
+
+                    var batches = await _dbContext.StockBatches
+                     .Where(b =>
+                         b.ProductId == item.ProductId &&
+                         b.WarehouseId == item.WarehouseId &&
+                         b.QuantityRemaining > 0)
+                     .OrderBy(b => b.ReceivedDate)   // ✅ الأقدم استلامًا أولًا
+                     .ThenBy(b => b.CreatedAt)
+                     .ThenBy(b => b.Id)
+                     .ToListAsync(cancellationToken);
+
+
+
+
+                    var totalAvailable = batches.Sum(b => b.QuantityRemaining);
+                    if (totalAvailable < item.Quantity)
+                    {
+                        throw new InvalidOperationException(
+                            $"Insufficient stock for product {item.ProductId} in warehouse {item.WarehouseId}. " +
+                            $"Available: {totalAvailable}, Requested: {item.Quantity}");
+                    }
+
+                    var remainingToAllocate = item.Quantity;
+
+                    foreach (var batch in batches)
+                    {
+                        if (remainingToAllocate <= 0) break;
+
+                        var allocateQty = Math.Min(batch.QuantityRemaining, remainingToAllocate);
+                        batch.QuantityRemaining -= allocateQty;
+                        remainingToAllocate -= allocateQty;
+
+                        // ✅ 6. إنشاء التخصيص مع تعيين الـ FKs صراحةً
+                        var allocation = new SaleItemBatchAllocation
+                        {
+                            Id = Guid.NewGuid(),
+                            SaleItemId = saleItem.Id,   // ✅ تعيين الـ FK صراحةً
+                            StockBatchId = batch.Id,    // ✅ تعيين الـ FK صراحةً
+                            Quantity = allocateQty,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = "system"
+                        };
+
+                        await _dbContext.SaleItemBatchAllocations.AddAsync(allocation, cancellationToken);
+
+                        // ✅ إشعار بتغيير المخزون
+                        await _notificationService.NotifyStockChangedAsync(
+                            batch.ProductId, batch.WarehouseId, batch.QuantityRemaining);
+
+                        // ✅ إشعار بانخفاض المخزون تحت الحد
+                        const decimal threshold = 5;
+                        if (batch.QuantityRemaining < threshold)
+                        {
+                            await _notificationService.NotifyStockBelowThresholdAsync(
+                                batch.ProductId, batch.WarehouseId, batch.QuantityRemaining, threshold);
+                        }
+                    }
                 }
+
+                // ✅ 7. حفظ كل التغييرات المتبقية
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                return new CreateSaleResponse { SaleId = sale.Id };
             }
-
-        }
-
-        await _dbContext.Sales.AddAsync(sale, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-
-        return new CreateSaleResponse
-        {
-            SaleId = sale.Id
-        };
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
     }
 }

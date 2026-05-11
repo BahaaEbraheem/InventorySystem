@@ -1,5 +1,6 @@
-﻿using InventorySystem.Application.Interfaces;
-using InventorySystem.Api.Hubs;
+﻿using InventorySystem.Api.Hubs;
+using InventorySystem.Application.Interfaces;
+using InventorySystem.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 
 namespace InventorySystem.Api.Services;
@@ -42,5 +43,35 @@ public class NotificationService : INotificationService
                 purchaseOrderId,
                 timestamp = DateTime.UtcNow
             });
+    }
+
+    public async Task NotifyPurchaseOrderSubmittedAsync(Guid purchaseOrderId)
+    {
+        await _hubContext.Clients.All
+           .SendAsync("PurchaseOrderSubmitted", new
+           {
+               purchaseOrderId,
+               timestamp = DateTime.UtcNow
+           });
+    }
+
+    public async Task NotifyPurchaseOrderCancelledAsync(Guid purchaseOrderId)
+    {
+        await _hubContext.Clients.All
+      .SendAsync("PurchaseOrderCancelled", new
+      {
+          purchaseOrderId,
+          timestamp = DateTime.UtcNow
+      });
+    }
+
+    public async Task NotifyTransferReceivedAsync(Guid transferId)
+    {
+        await _hubContext.Clients.All
+      .SendAsync("TransferReceived", new
+      {
+          transferId,
+          timestamp = DateTime.UtcNow
+      });
     }
 }

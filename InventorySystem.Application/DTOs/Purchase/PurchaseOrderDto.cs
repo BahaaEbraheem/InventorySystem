@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InventorySystem.Shared.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,6 +11,7 @@ namespace InventorySystem.Application.DTOs.Purchase
         public Guid SupplierId { get; set; }
         public string? SupplierName { get; set; }
         public DateTime PurchaseDate { get; set; }
+        public PurchaseOrderStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? CreatedBy { get; set; }
         public decimal TotalAmount { get; set; }
