@@ -38,10 +38,13 @@ public class StockTransferService : IStockTransferService
         if (request.FromWarehouseId == request.ToWarehouseId)
             throw new ArgumentException("لا يمكن التحويل إلى نفس المستودع");
 
+
+        //التعامل مع التنافس (Concurrency)
         var strategy = _dbContext.Database.CreateExecutionStrategy();
 
         return await strategy.ExecuteAsync(async () =>
         {
+            //ضمان أن العملية إما تنفذ بالكامل أو تُلغى بالكامل (Atomic Transaction)
             using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
 
             try
@@ -86,7 +89,7 @@ public class StockTransferService : IStockTransferService
                         .OrderBy(b => b.PurchaseDate)
                         .ThenBy(b => b.CreatedAt)
                         .ToList();
-
+                    //منع حدوث مخزون سلبي في المستودع المصدر عن طريق التحقق من الكمية المتاحة قبل الخصم:
                     var totalAvailable = sourceBatches.Sum(b => b.QuantityRemaining);
                     if (totalAvailable < item.Quantity)
                     {
