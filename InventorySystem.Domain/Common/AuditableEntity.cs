@@ -8,8 +8,8 @@ namespace InventorySystem.Domain.Common
     {
         public Guid Id { get; set; }
 
-        public string CreatedBy { get; set; } = default!;
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string CreatedBy { get; set; } = "system";
 
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedAt { get; set; }

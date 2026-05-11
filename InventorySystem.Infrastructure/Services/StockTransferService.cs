@@ -57,7 +57,8 @@ public class StockTransferService : IStockTransferService
                     TransferDate = request.TransferDate,
                     IdempotencyKey = request.IdempotencyKey,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = "system"
+                    CreatedBy = "system",
+                    Items = new List<StockTransferItem>()
                 };
 
                 foreach (var item in request.Items)
@@ -146,6 +147,44 @@ public class StockTransferService : IStockTransferService
             }
         });
     }
-  
+
+
+    /// <summary>
+    /// Retrieves full transfer details including items and warehouse info.
+    /// Moved from controller to keep the API layer thin.
+    /// </summary>
+    public async Task<StockTransferDetailDto?> GetTransferByIdAsync(
+        Guid transferId,
+        CancellationToken cancellationToken = default)
+    {
+        var transfer = await _dbContext.StockTransfers
+            .AsNoTracking()
+            .Include(t => t.FromWarehouse)
+            .Include(t => t.ToWarehouse)
+            .Include(t => t.Items)
+                .ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(t => t.Id == transferId, cancellationToken);
+
+        if (transfer == null)
+            return null;
+
+        return new StockTransferDetailDto
+        {
+            Id = transfer.Id,
+            TransferDate = transfer.TransferDate,
+            FromWarehouseId = transfer.FromWarehouseId,
+            FromWarehouseName = transfer.FromWarehouse?.Name ?? string.Empty,
+            ToWarehouseId = transfer.ToWarehouseId,
+            ToWarehouseName = transfer.ToWarehouse?.Name ?? string.Empty,
+            Status = transfer.Status.ToString(),
+            CompletedAt = transfer.CompletedAt,
+            Items = transfer.Items.Select(i => new StockTransferItemDetailDto
+            {
+                ProductId = i.ProductId,
+                ProductName = i.Product?.Name ?? string.Empty,
+                Quantity = i.Quantity
+            }).ToList()
+        };
+    }
 }
 

@@ -161,7 +161,56 @@ public class SalesService : ISalesService
             }
         });
     }
+    /// <summary>
+    /// Retrieves full sale details including batch allocations for traceability.
+    /// Moved from controller to keep the API layer thin.
+    /// </summary>
+    public async Task<SaleDetailDto?> GetSaleByIdAsync(
+        Guid saleId,
+        CancellationToken cancellationToken = default)
+    {
+        var sale = await _dbContext.Sales
+            .AsNoTracking()
+            .Include(s => s.Warehouse)
+            .Include(s => s.Items)
+                .ThenInclude(i => i.Product)
+            .Include(s => s.Items)
+                .ThenInclude(i => i.BatchAllocations)
+                    .ThenInclude(a => a.StockBatch)
+                        .ThenInclude(b => b.Supplier)
+            .Include(s => s.Items)
+                .ThenInclude(i => i.BatchAllocations)
+                    .ThenInclude(a => a.StockBatch)
+                        .ThenInclude(b => b.PurchaseOrderItem)
+            .FirstOrDefaultAsync(s => s.Id == saleId, cancellationToken);
 
+        if (sale == null)
+            return null;
+
+        return new SaleDetailDto
+        {
+            Id = sale.Id,
+            SaleDate = sale.SaleDate,
+            WarehouseId = sale.WarehouseId,
+            WarehouseName = sale.Warehouse?.Name ?? string.Empty,
+            Items = sale.Items.Select(item => new SaleItemDetailDto
+            {
+                Id = item.Id,
+                ProductId = item.ProductId,
+                ProductName = item.Product?.Name ?? string.Empty,
+                Quantity = item.Quantity,
+                BatchAllocations = item.BatchAllocations.Select(a => new BatchAllocationDto
+                {
+                    StockBatchId = a.StockBatchId,
+                    SupplierId = a.StockBatch.SupplierId,
+                    SupplierName = a.StockBatch.Supplier?.Name ?? string.Empty,
+                    PurchaseOrderItemId = a.StockBatch.PurchaseOrderItemId,
+                    PurchaseDate = a.StockBatch.PurchaseDate,
+                    AllocatedQuantity = a.Quantity
+                }).ToList()
+            }).ToList()
+        };
+    }
 
 
 }

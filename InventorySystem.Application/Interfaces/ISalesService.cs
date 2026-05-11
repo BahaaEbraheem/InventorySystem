@@ -8,5 +8,8 @@ namespace InventorySystem.Application.Interfaces
     public interface ISalesService
     {
         Task<CreateSaleResponse> CreateSaleAsync(CreateSaleRequest request, CancellationToken cancellationToken = default);
+        Task<SaleDetailDto?> GetSaleByIdAsync(
+    Guid saleId,
+    CancellationToken cancellationToken = default);
     }
 }
