@@ -131,7 +131,7 @@ if (app.Environment.IsDevelopment())
         if (!await db.Products.AnyAsync())
         {
             logger.LogInformation("🌱 Seeding initial data...");
-            //await DbSeeder.SeedAsync(db);
+            await DbSeeder.SeedAsync(db);
             logger.LogInformation("✅ Seeding completed");
         }
     }

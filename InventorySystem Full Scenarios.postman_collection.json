@@ -1,0 +1,1095 @@
+{
+  "info": {
+    "_postman_id": "e42ab75b-4948-4275-8342-58b2ac7ce99f",
+    "name": "InventorySystem Full Scenarios",
+    "description": "Full end-to-end scenarios for InventorySystem (Purchases, Sales, Transfers, Reports)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "16308516"
+  },
+  "item": [
+    {
+      "name": "1 - Get Seed Data",
+      "item": [
+        {
+          "name": "Get Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Products"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Products",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Products",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Products"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 23:04:00 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"name\": \"Chocolate Bar\",\n        \"sku\": \"CHOC-001\",\n        \"isActive\": true,\n        \"categoryId\": \"9c4335d6-60b0-4f5e-b3b3-067699bac956\",\n        \"category\": null,\n        \"id\": \"34c5fb6e-6d9c-40d0-9e93-72ea43d90267\",\n        \"createdAt\": \"2026-05-11T22:38:10.6353188\",\n        \"createdBy\": \"seed\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    },\n    {\n        \"name\": \"Laptop Dell\",\n        \"sku\": \"LAP-001\",\n        \"isActive\": true,\n        \"categoryId\": \"f55fe138-911b-46a0-8faa-49dca4889acf\",\n        \"category\": null,\n        \"id\": \"c5fa63b8-59e9-49b0-8ade-9e2580ffde59\",\n        \"createdAt\": \"2026-05-11T22:38:10.6353156\",\n        \"createdBy\": \"seed\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Warehouses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Warehouses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Warehouses"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Warehouses",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Warehouses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Warehouses"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 23:04:15 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"name\": \"Main Warehouse\",\n        \"isActive\": true,\n        \"location\": \"Riyadh\",\n        \"id\": \"47b70b66-2946-4478-932a-c5dcddaf3f32\",\n        \"createdAt\": \"2026-05-11T22:38:10.5324197\",\n        \"createdBy\": \"seed\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    },\n    {\n        \"name\": \"Branch Warehouse\",\n        \"isActive\": true,\n        \"location\": \"Jeddah\",\n        \"id\": \"54eaf6b4-e470-4c8a-895d-d588f9b6701a\",\n        \"createdAt\": \"2026-05-11T22:38:10.5324213\",\n        \"createdBy\": \"seed\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Suppliers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Suppliers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Suppliers"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Suppliers",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Suppliers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Suppliers"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 23:04:35 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"name\": \"Supplier A\",\n        \"isActive\": true,\n        \"id\": \"48d18c2c-20dd-4a12-8465-6a06e8262f62\",\n        \"createdAt\": \"2026-05-11T22:38:10.532631\",\n        \"createdBy\": \"seed\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    },\n    {\n        \"name\": \"Supplier B\",\n        \"isActive\": true,\n        \"id\": \"a04febb2-85cc-4dd7-acaa-ffc9deb4ef50\",\n        \"createdAt\": \"2026-05-11T22:38:10.5326323\",\n        \"createdBy\": \"seed\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get StockBatches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/StockBatches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "StockBatches"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get StockBatches",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/StockBatches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "StockBatches"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 23:04:51 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"productId\": \"c5fa63b8-59e9-49b0-8ade-9e2580ffde59\",\n        \"supplierId\": \"48d18c2c-20dd-4a12-8465-6a06e8262f62\",\n        \"supplier\": null,\n        \"warehouseId\": \"47b70b66-2946-4478-932a-c5dcddaf3f32\",\n        \"warehouse\": null,\n        \"purchaseOrderItemId\": \"4714b542-8052-4048-9466-e6abd52ba2ff\",\n        \"purchaseOrderItem\": null,\n        \"isActive\": true,\n        \"orderedQuantity\": 50,\n        \"quantityReceived\": 50,\n        \"quantityRemaining\": 50,\n        \"quantityReserved\": 0,\n        \"quantityAvailable\": 50,\n        \"purchaseDate\": \"2026-05-01T22:38:10.7605871\",\n        \"receivedDate\": \"2026-05-02T22:38:10.7627836\",\n        \"isFullyReceived\": true,\n        \"rowVersion\": \"AAAAAAAAB9I=\",\n        \"id\": \"0e9251d5-52d1-4884-9e66-993c6f8d13a8\",\n        \"createdAt\": \"2026-05-11T22:38:10.7628423\",\n        \"createdBy\": \"seed\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    },\n    {\n        \"productId\": \"34c5fb6e-6d9c-40d0-9e93-72ea43d90267\",\n        \"supplierId\": \"48d18c2c-20dd-4a12-8465-6a06e8262f62\",\n        \"supplier\": null,\n        \"warehouseId\": \"54eaf6b4-e470-4c8a-895d-d588f9b6701a\",\n        \"warehouse\": null,\n        \"purchaseOrderItemId\": \"a74903bc-6055-405d-b724-aee039174e70\",\n        \"purchaseOrderItem\": null,\n        \"isActive\": true,\n        \"orderedQuantity\": 0,\n        \"quantityReceived\": 20,\n        \"quantityRemaining\": 20,\n        \"quantityReserved\": 0,\n        \"quantityAvailable\": 20,\n        \"purchaseDate\": \"2025-05-10T00:00:00\",\n        \"receivedDate\": null,\n        \"isFullyReceived\": true,\n        \"rowVersion\": \"AAAAAAAAB9Y=\",\n        \"id\": \"06f6c8aa-aa43-4f46-84d1-e0e5c1763e21\",\n        \"createdAt\": \"2026-05-11T22:56:38.9021831\",\n        \"createdBy\": \"system\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    },\n    {\n        \"productId\": \"34c5fb6e-6d9c-40d0-9e93-72ea43d90267\",\n        \"supplierId\": \"48d18c2c-20dd-4a12-8465-6a06e8262f62\",\n        \"supplier\": null,\n        \"warehouseId\": \"47b70b66-2946-4478-932a-c5dcddaf3f32\",\n        \"warehouse\": null,\n        \"purchaseOrderItemId\": \"a74903bc-6055-405d-b724-aee039174e70\",\n        \"purchaseOrderItem\": null,\n        \"isActive\": true,\n        \"orderedQuantity\": 30,\n        \"quantityReceived\": 30,\n        \"quantityRemaining\": 0,\n        \"quantityReserved\": 0,\n        \"quantityAvailable\": 0,\n        \"purchaseDate\": \"2025-05-10T00:00:00\",\n        \"receivedDate\": \"2026-05-11T22:50:21.7140949\",\n        \"isFullyReceived\": true,\n        \"rowVersion\": \"AAAAAAAAB9U=\",\n        \"id\": \"25c7b0d0-e7ce-4666-8e51-f7ee69d544b6\",\n        \"createdAt\": \"2026-05-11T22:50:21.7140959\",\n        \"createdBy\": \"system\",\n        \"modifiedBy\": null,\n        \"modifiedAt\": null,\n        \"isDeleted\": false\n    }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 - Purchase Scenarios",
+      "item": [
+        {
+          "name": "Create Purchase Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplierId\": \"{{supplierAId}}\",\n  \"purchaseDate\": \"2025-05-10\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"warehouseId\": \"{{mainWarehouseId}}\",\n      \"quantity\": 30,\n      \"unitCost\": 500\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Purchases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Purchases"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Create Purchase Order",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"supplierId\": \"{{supplierAId}}\",\n  \"purchaseDate\": \"2025-05-10\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"warehouseId\": \"{{mainWarehouseId}}\",\n      \"quantity\": 30,\n      \"unitCost\": 500\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/Purchases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Purchases"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:48:50 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Location",
+                  "value": "https://localhost:7039/api/Purchases/75b509dd-7fa8-4958-aaa7-d8d3ebabe267"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Purchase order created successfully\",\n    \"data\": {\n        \"purchaseOrderId\": \"75b509dd-7fa8-4958-aaa7-d8d3ebabe267\"\n    },\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit Purchase Order",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Purchases/{{purchaseOrderId}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Purchases",
+                "{{purchaseOrderId}}",
+                "submit"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Submit Purchase Order",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Purchases/{{purchaseOrderId}}/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Purchases",
+                    "{{purchaseOrderId}}",
+                    "submit"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:49:07 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Purchase order submitted successfully. Status: Submitted\",\n    \"data\": {\n        \"id\": \"75b509dd-7fa8-4958-aaa7-d8d3ebabe267\",\n        \"supplierId\": \"48d18c2c-20dd-4a12-8465-6a06e8262f62\",\n        \"supplierName\": \"Supplier A\",\n        \"purchaseDate\": \"2025-05-10T00:00:00\",\n        \"status\": 2,\n        \"createdAt\": \"2026-05-11T22:48:51.32514\",\n        \"createdBy\": \"system\",\n        \"totalAmount\": 15000,\n        \"itemsCount\": 1,\n        \"items\": [\n            {\n                \"id\": \"a74903bc-6055-405d-b724-aee039174e70\",\n                \"productId\": \"34c5fb6e-6d9c-40d0-9e93-72ea43d90267\",\n                \"productName\": \"Chocolate Bar\",\n                \"productSku\": \"CHOC-001\",\n                \"warehouseId\": \"47b70b66-2946-4478-932a-c5dcddaf3f32\",\n                \"warehouseName\": \"Main Warehouse\",\n                \"unitCost\": 500,\n                \"quantity\": 30,\n                \"lineTotal\": 15000,\n                \"createdAt\": \"2026-05-11T22:48:51.3253326\",\n                \"createdBy\": \"system\"\n            }\n        ]\n    },\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Receive Purchase Order (Full)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"purchaseOrderItemId\": \"{{poItemId}}\",\n    \"receivedQuantity\": 30\n  }\n]"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Purchases/{{purchaseOrderId}}/receive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Purchases",
+                "{{purchaseOrderId}}",
+                "receive"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Receive Purchase Order (Full)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n  {\n    \"purchaseOrderItemId\": \"{{poItemId}}\",\n    \"receivedQuantity\": 30\n  }\n]"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/Purchases/{{purchaseOrderId}}/receive",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Purchases",
+                    "{{purchaseOrderId}}",
+                    "receive"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:50:21 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Purchase order received successfully. Status: Received\",\n    \"data\": {\n        \"purchaseOrderId\": \"75b509dd-7fa8-4958-aaa7-d8d3ebabe267\",\n        \"status\": 4,\n        \"receivedAt\": \"2026-05-11T22:50:21.7150954Z\",\n        \"totalReceivedQuantity\": 30\n    },\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Purchase Order",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Purchases/{{purchaseOrderId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Purchases",
+                "{{purchaseOrderId}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Cancel Purchase Order",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Purchases/{{purchaseOrderId}}/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Purchases",
+                    "{{purchaseOrderId}}",
+                    "cancel"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:50:33 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"code\": \"BUSINESS_RULE_VIOLATION\",\n    \"message\": \"Cannot cancel order in status 'Received'. Only 'Draft' or 'Submitted' orders can be cancelled.\",\n    \"data\": null,\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 - Sales Scenarios",
+      "item": [
+        {
+          "name": "Sale 10 units (FIFO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotencyKey\": \"sale-001\",\n  \"saleDate\": \"2025-05-12\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"warehouseId\": \"{{mainWarehouseId}}\",\n      \"quantity\": 10\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Sales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Sales"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Sale 10 units (FIFO)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idempotencyKey\": \"11111111-2222-3333-4444-555555555555\",\n  \"saleDate\": \"2025-05-12\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"warehouseId\": \"{{mainWarehouseId}}\",\n      \"quantity\": 10\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/Sales",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Sales"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:53:33 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Location",
+                  "value": "https://localhost:7039/api/Sales/0b33e7c3-32a1-4058-937a-ececd227668f"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Sale created successfully.\",\n    \"data\": {\n        \"saleId\": \"0b33e7c3-32a1-4058-937a-ececd227668f\"\n    },\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sale 100 units (Insufficient Stock)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotencyKey\": \"sale-002\",\n  \"saleDate\": \"2025-05-12\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"warehouseId\": \"{{mainWarehouseId}}\",\n      \"quantity\": 100\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Sales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Sales"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Sale 100 units (Insufficient Stock)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idempotencyKey\": \"11111111-2222-3333-4444-666666666666\",\n  \"saleDate\": \"2025-05-12\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"warehouseId\": \"{{mainWarehouseId}}\",\n      \"quantity\": 100\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/Sales",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Sales"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:54:27 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"code\": \"CONFLICT\",\n    \"message\": \"المخزون غير كافٍ\",\n    \"data\": null,\n    \"errors\": [\n        {\n            \"field\": \"operation\",\n            \"code\": \"CONFLICT\",\n            \"message\": \"المخزون غير كافٍ\"\n        }\n    ],\n    \"meta\": {\n        \"traceId\": \"0HNLFLR3PN032:00000003\",\n        \"timestamp\": \"2026-05-11T22:54:27.363705Z\",\n        \"environment\": \"Development\",\n        \"version\": \"1.0.0\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Sale By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Sales/{{saleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Sales",
+                "{{saleId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Sale By Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Sales/{{saleId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Sales",
+                    "{{saleId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:55:09 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Sale retrieved successfully.\",\n    \"data\": {\n        \"id\": \"0b33e7c3-32a1-4058-937a-ececd227668f\",\n        \"saleDate\": \"2025-05-12T00:00:00\",\n        \"warehouseId\": \"47b70b66-2946-4478-932a-c5dcddaf3f32\",\n        \"warehouseName\": \"Main Warehouse\",\n        \"items\": [\n            {\n                \"id\": \"101b5fc5-bccb-4c5c-a567-1a625b346b70\",\n                \"productId\": \"34c5fb6e-6d9c-40d0-9e93-72ea43d90267\",\n                \"productName\": \"Chocolate Bar\",\n                \"quantity\": 10,\n                \"batchAllocations\": [\n                    {\n                        \"stockBatchId\": \"25c7b0d0-e7ce-4666-8e51-f7ee69d544b6\",\n                        \"supplierId\": \"48d18c2c-20dd-4a12-8465-6a06e8262f62\",\n                        \"supplierName\": \"Supplier A\",\n                        \"purchaseOrderItemId\": \"a74903bc-6055-405d-b724-aee039174e70\",\n                        \"purchaseDate\": \"2025-05-10T00:00:00\",\n                        \"allocatedQuantity\": 10\n                    }\n                ]\n            }\n        ]\n    },\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4 - Stock Transfer",
+      "item": [
+        {
+          "name": "Transfer 20 units to Branch Warehouse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotencyKey\": \"transfer-001\",\n  \"transferDate\": \"2025-05-12\",\n  \"fromWarehouseId\": \"{{mainWarehouseId}}\",\n  \"toWarehouseId\": \"{{branchWarehouseId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 20\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/StockTransfers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "StockTransfers"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Transfer 20 units to Branch Warehouse",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idempotencyKey\": \"11111111-2222-3333-4444-777777777777\",\n  \"transferDate\": \"2025-05-12\",\n  \"fromWarehouseId\": \"{{mainWarehouseId}}\",\n  \"toWarehouseId\": \"{{branchWarehouseId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 20\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/StockTransfers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "StockTransfers"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:56:38 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Location",
+                  "value": "https://localhost:7039/api/StockTransfers/25b51f6d-4e4c-4b14-9e8d-5830919f92a6"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Stock transfer completed successfully.\",\n    \"data\": {\n        \"stockTransferId\": \"25b51f6d-4e4c-4b14-9e8d-5830919f92a6\"\n    },\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Transfer By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/StockTransfers/{{transferId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "StockTransfers",
+                "{{transferId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Transfer By Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/StockTransfers/{{transferId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "StockTransfers",
+                    "{{transferId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 22:56:59 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Transfer retrieved successfully.\",\n    \"data\": {\n        \"id\": \"25b51f6d-4e4c-4b14-9e8d-5830919f92a6\",\n        \"transferDate\": \"2025-05-12T00:00:00\",\n        \"fromWarehouseId\": \"47b70b66-2946-4478-932a-c5dcddaf3f32\",\n        \"fromWarehouseName\": \"Main Warehouse\",\n        \"toWarehouseId\": \"54eaf6b4-e470-4c8a-895d-d588f9b6701a\",\n        \"toWarehouseName\": \"Branch Warehouse\",\n        \"status\": \"Pending\",\n        \"completedAt\": null,\n        \"items\": [\n            {\n                \"productId\": \"34c5fb6e-6d9c-40d0-9e93-72ea43d90267\",\n                \"productName\": \"Chocolate Bar\",\n                \"quantity\": 20\n            }\n        ]\n    },\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5 - Reports",
+      "item": [
+        {
+          "name": "Sales by Supplier A",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Reports/sales?supplierId={{supplierAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Reports",
+                "sales"
+              ],
+              "query": [
+                {
+                  "key": "supplierId",
+                  "value": "{{supplierAId}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Sales by Supplier A",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Reports/sales?supplierId={{supplierAId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Reports",
+                    "sales"
+                  ],
+                  "query": [
+                    {
+                      "key": "supplierId",
+                      "value": "{{supplierAId}}"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 23:00:21 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Report generated successfully. 1 record(s) found.\",\n    \"data\": [\n        {\n            \"productId\": \"34c5fb6e-6d9c-40d0-9e93-72ea43d90267\",\n            \"productName\": \"Chocolate Bar\",\n            \"supplierId\": \"48d18c2c-20dd-4a12-8465-6a06e8262f62\",\n            \"supplierName\": \"Supplier A\",\n            \"warehouseId\": \"47b70b66-2946-4478-932a-c5dcddaf3f32\",\n            \"warehouseName\": \"Main Warehouse\",\n            \"quantitySold\": 10,\n            \"firstSaleDate\": \"2025-05-12T00:00:00\",\n            \"lastSaleDate\": \"2025-05-12T00:00:00\"\n        }\n    ],\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remaining Stock from Shipment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Reports/shipment-stock/{{poItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Reports",
+                "shipment-stock",
+                "{{poItemId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Remaining Stock from Shipment",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Reports/shipment-stock/{{poItemId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "Reports",
+                    "shipment-stock",
+                    "{{poItemId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 11 May 2026 23:00:33 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Kestrel"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS\",\n    \"message\": \"Shipment stock retrieved successfully.\",\n    \"data\": {\n        \"purchaseOrderItemId\": \"a74903bc-6055-405d-b724-aee039174e70\",\n        \"totalRemaining\": 20,\n        \"totalReserved\": 0,\n        \"byWarehouse\": [\n            {\n                \"warehouseId\": \"54eaf6b4-e470-4c8a-895d-d588f9b6701a\",\n                \"quantity\": 20\n            },\n            {\n                \"warehouseId\": \"47b70b66-2946-4478-932a-c5dcddaf3f32\",\n                \"quantity\": 0\n            }\n        ]\n    },\n    \"errors\": [],\n    \"meta\": null\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7039"
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "mainWarehouseId",
+      "value": ""
+    },
+    {
+      "key": "branchWarehouseId",
+      "value": ""
+    },
+    {
+      "key": "supplierAId",
+      "value": ""
+    },
+    {
+      "key": "purchaseOrderId",
+      "value": ""
+    },
+    {
+      "key": "poItemId",
+      "value": ""
+    },
+    {
+      "key": "saleId",
+      "value": ""
+    },
+    {
+      "key": "transferId",
+      "value": ""
+    }
+  ]
+}

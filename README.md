@@ -303,6 +303,103 @@ Assert.True(elapsed.TotalMilliseconds < 500, $"Report took {elapsed.TotalMillise
 Assert.Equal(0, sourceWarehouseStock);
 Assert.Equal(transferredQty, destinationWarehouseStock);
 ```
+---
+## ✨ 📁 Postman Collection – Full End-to-End Scenarios
+
+تم إنشاء ملف Postman Collection شامل باسم:
+
+### **`InventorySystem Full Scenarios.postman_collection.json`**
+
+وهو يغطي جميع السيناريوهات المطلوبة في المهمة من البداية للنهاية، ويعمل مباشرة دون أي إعداد إضافي بفضل بيانات الـ **Seed** التي يتم إنشاؤها تلقائيًا عند تشغيل المشروع لأول مرة.
+
+يُستخدم هذا الـ Collection لاختبار النظام كاملًا (End-to-End) والتحقق من صحة كل التدفقات الأساسية: الشراء، الاستلام، البيع، التحويل، والتقارير.
+
+---
+
+### 🎯 ما الذي يغطيه الـ Collection؟
+
+الملف يحتوي على مجموعات منظمة وجاهزة للتنفيذ:
+
+---
+
+### **1) Get Seed Data**
+
+- Get Products  
+- Get Warehouses  
+- Get Suppliers  
+- Get StockBatches  
+
+> تُستخدم هذه المجموعة للحصول على الـ IDs تلقائيًا من بيانات الـ Seeder، مما يجعل بقية السيناريوهات تعمل دون أي إدخال يدوي.
+
+---
+
+### **2) Purchase Scenarios**
+
+- Create Purchase Order  
+- Submit Purchase Order  
+- Receive Purchase Order (Full / Partial)  
+- Cancel Purchase Order  
+
+> جميع الاستجابات تعمل بنجاح وتعيد `BaseResponse<T>` موحدًا، مع تتبع كامل لحالات الطلب.
+
+---
+
+### **3) Sales Scenarios**
+
+- Sale 10 units (FIFO)  
+- Sale 100 units (Insufficient Stock)  
+- Get Sale By Id (مع Batch Allocations كاملة)  
+
+> تم اختبار كل السيناريوهات بنجاح، بما في ذلك حالات التزامن (Concurrency) لضمان عدم حدوث Negative Stock.
+
+---
+
+### **4) Stock Transfer Scenarios**
+
+- Transfer 20 units (Main → Branch)  
+- Get Transfer By Id  
+
+> الاستجابة تتضمن تفاصيل الدُفعات الجديدة في المستودع الوجهة، مع الحفاظ على **SupplierId** و **PurchaseDate** لضمان التتبع الكامل.
+
+---
+
+### **5) Reports**
+
+- Sales by Supplier  
+- Remaining Stock from Shipment  
+
+> جميع التقارير تعمل وتعيد نتائج صحيحة مع الأداء المطلوب (< 500ms)، وتستخدم الفلاتر الديناميكية حسب الحاجة.
+
+---
+
+## 🧪 نجاح جميع Responses
+
+تم اختبار كل الطلبات داخل الـ Collection، وجميعها أعادت الاستجابات المتوقعة:
+
+- **200 OK**  
+- **201 Created**  
+- **400 Bad Request** (عند الإدخال الخاطئ)  
+- **409 Conflict** (عند التزامن أو Idempotency)  
+- **404 Not Found** (عند طلب بيانات غير موجودة)  
+
+وكلها تعمل ضمن الهيكل الموحد:
+
+```json
+BaseResponse<T>
+{
+  "success": true/false,
+  "code": "SUCCESS / VALIDATION_ERROR / CONFLICT / NOT_FOUND",
+  "message": "Readable message",
+  "data": { ... },
+  "errors": [ ... ],
+  "meta": {
+    "traceId": "...",
+    "timestamp": "...",
+    "environment": "...",
+    "version": "1.0.0"
+  }
+}
+
 
 ---
 

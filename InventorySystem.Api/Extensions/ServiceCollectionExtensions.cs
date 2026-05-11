@@ -10,7 +10,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPurchaseService, PurchaseService>();
         services.AddScoped<ISalesService, SalesService>();
         services.AddScoped<IStockTransferService, StockTransferService>();
-
+        services.AddScoped<IReportingService, ReportingService>();
+        
         return services;
     }
 }
