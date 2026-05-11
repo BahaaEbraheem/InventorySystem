@@ -51,11 +51,11 @@ public class ReportingService : IReportingService
             .GroupBy(a => new
             {
                 ProductId = a.SaleItem.ProductId,
-                ProductName = a.SaleItem.Product.Name,           // ✅ اسم صريح
+                ProductName = a.SaleItem.Product.Name,          
                 SupplierId = a.StockBatch.SupplierId,
-                SupplierName = a.StockBatch.Supplier.Name,       // ✅ اسم صريح
+                SupplierName = a.StockBatch.Supplier.Name,       
                 WarehouseId = a.StockBatch.WarehouseId,
-                WarehouseName = a.StockBatch.Warehouse.Name      // ✅ اسم صريح
+                WarehouseName = a.StockBatch.Warehouse.Name      
             })
             .Select(g => new SalesReportItemDto
             {
